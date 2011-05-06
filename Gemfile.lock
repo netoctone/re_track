@@ -29,6 +29,9 @@ GEM
       activesupport (= 3.0.7)
     activesupport (3.0.7)
     arel (2.0.9)
+    authlogic (3.0.2)
+      activerecord (~> 3.0.7)
+      activerecord (~> 3.0.7)
     builder (2.1.2)
     cucumber (0.10.2)
       builder (>= 2.1.2)
@@ -98,6 +101,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  authlogic
   cucumber-rails
   mysql2 (= 0.2.7)
   rails (= 3.0.7)
