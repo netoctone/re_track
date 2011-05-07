@@ -19,7 +19,7 @@ class ApplicationController < ActionController::Base
 
   def require_user
     logger.debug "#{self.class.name}##{__method__}"
-    if current_user
+    unless current_user
       store_location
       redirect_to :users, :notice => 'You must be logged in'
       return false
@@ -27,7 +27,7 @@ class ApplicationController < ActionController::Base
   end
 
   def store_location
-    session[:stored_location] = request.request_url
+    session[:stored_location] = request.request_uri
   end
 
   def redirect_back_or_default default
