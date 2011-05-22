@@ -24,4 +24,17 @@ class FuncController < ApplicationController
     end
   end
 
+  def bts_list
+    respond_to do |format|
+      format.json do
+        render json: {
+          success: true,
+          bts_list: Bts.bts_list.map do |bts|
+            { name: bts.name }
+          end
+        }
+      end
+    end
+  end
+
 end

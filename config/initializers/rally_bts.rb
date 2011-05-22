@@ -17,10 +17,11 @@ class RallyBts < Bts
     # returns false if cannot authenticate with given username and password
     # thus returns false if account is blocked
     #
-    def account_available? username, password
+    def authenticable? username, password
       rally_rest_api username, password
       true
-    rescue Rally::NotAuthenticatedError
+    rescue Rally::NotAuthenticatedError => e
+      ::Rails.logger.info e.message
       false
     end
 
