@@ -12,6 +12,7 @@
     <%= link_to 'Logout', :logout %>
   <% else %>
     <%= link_to 'Login', :login %>
+    <%= link_to 'Register', new_user_path %>
   <% end %>
 
 <%= yield %>
