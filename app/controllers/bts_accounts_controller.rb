@@ -23,10 +23,29 @@ class BtsAccountsController < ApplicationController
       format_json(format, bts_account)
     end
   end
+
+  # GET /bts_accounts/show_current.json
+  def show_current
+    bts_account = BtsAccount.where(:user_id => current_user_id,
+                                   :current => true).first
+    
+    respond_to do |format|
+      if bts_account
+        format_json format, bts_account
+      else
+        format.json do
+          render json: {
+            success: false,
+            errormsg: 'No current account'
+          }
+        end
+      end
+    end
+  end
   
   # POST /bts_accounts.json
   def create
-    params[:bts_account][:user_id] = current_user.id
+    params[:bts_account][:user_id] = current_user_id
     bts_account = BtsAccount.new(params[:bts_account])
 
     respond_to do |format|
@@ -39,11 +58,22 @@ class BtsAccountsController < ApplicationController
         end
       else
         format.json do
-          render json: {
-            success: false,
-            errors: bts_account.errors #maybe change format
-          }
+          render json: ext_error_json(bts_account.errors)
         end
+      end
+    end
+  end
+
+  # PUT /bts_accounts/update_current.json
+  def update_current
+    #rally connection dependency not good
+    BtsAccount.update_current(params[:id], current_user.id)
+
+    respond_to do |format|
+      format.json do
+        render json: {
+          success: true
+        }
       end
     end
   end
@@ -62,10 +92,7 @@ class BtsAccountsController < ApplicationController
         format_json(format, bts_account)
       else
         format.json do
-          render json: {
-            success: false,
-            errors: bts_account.errors #maybe change format
-          }
+          render json: ext_error_json(bts_account.errors)
         end
       end
     end
@@ -99,5 +126,11 @@ class BtsAccountsController < ApplicationController
         }
       }
     end
+  end
+
+  def ext_error_json errors
+    res = { :success => false }
+    res[:errormsg] = errors[:base].join('<br/>') if errors[:base]
+    res
   end
 end
