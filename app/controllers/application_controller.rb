@@ -11,6 +11,11 @@ class ApplicationController < ActionController::Base
     @current_user_session = UserSession.find
   end
 
+  def current_user_id # need to improve efficiency
+    logger.debug "#{self.class.name}##{__method__}"
+    return current_user_session && current_user_session.user.id
+  end
+
   def current_user
     logger.debug "#{self.class.name}##{__method__}"
     return @current_user if defined? @current_user

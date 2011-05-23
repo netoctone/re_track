@@ -18,8 +18,7 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
               success: function(form, action) {
                 var values = form.getValues();
                 form.reset();
-                var respObj = Ext.util.JSON.decode(action.response.responseText);
-                Ext.apply(values, { id: respObj.id });
+                Ext.apply(values, { id: action.result.id });
                 accCombo.getStore().reload({
                   callback: function() {
                     accCombo.setValue(values.id);
@@ -41,7 +40,7 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
         }
       ]
     });
-    updateAccForm = new ReTrack.AccountForm({
+    updateAccForm = this.updateAccForm = new ReTrack.AccountForm({
       title: 'Account',
       buttons: [
         {
@@ -54,15 +53,21 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
               params: {
                 id: updateAccForm.getForm().getValues().id
               },
-              success: function() {
-                //unset validation highlight
-                accCombo.setValue('');
-                accCombo.getStore().reload();
-                accFormsCard.getLayout().setActiveItem(0);
-                Ext.Msg.alert('Notification', 'account successfully deleted');
+              success: function(resp) {
+                var respObj = Ext.util.JSON.decode(resp.responseText);
+                if(respObj.success) {
+                  //unset validation highlight
+                  accCombo.setValue('');
+                  accCombo.getStore().reload();
+                  accFormsCard.getLayout().setActiveItem(0);
+                  Ext.Msg.alert('Notification', 'account successfully deleted');
+                } else {
+                  Ext.Msg.alert('Error', 'can\'t delete account');
+                }
               },
               failure: function() {
-                Ext.Msg.alert('failure', 'some error occured');
+                //think
+                Ext.Msg.alert('Connection failure', 'server not responding');
               }
             });
           }
@@ -76,14 +81,13 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
               method: 'put',
               waitMsg: 'Updating ...',
               success: function(form, action) {
-                var respObj = Ext.util.JSON.decode(action.response.responseText);
-                var values = respObj.account;
+                var values = action.result.account;
                 accCombo.getStore().reload({
                   callback: function() {
                     accCombo.setValue(values.id);
                   }
                 });
-                updateAccForm.setAccount(values);
+                updateAccForm.updateAccount(values);
                 //Ext.Msg.alert('Notification', 'account successfully updated');
               },
               failure: function(form, action) {
@@ -92,7 +96,7 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
                 } else if(action.failureType == Ext.form.Action.CONNECT_FAILURE) {
                   Ext.Msg.alert('Connection failure', 'server not responding');
                 } else if(action.failureType == Ext.form.Action.SERVER_INVALID) {
-                  Ext.Msg.alert('Account wan\'t updated', 'wrong login details');
+                  Ext.Msg.alert('Account wan\'t updated', action.result.errormsg);//is it true?
                 }
                 updateAccForm.rollbackAccount();
               }
@@ -106,9 +110,21 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
       name: 'id'
     });
     Ext.apply(updateAccForm, {
-      setAccount: function(values) {
+      updateAccount: function(values) {
         updateAccForm.oldValues = values;
         updateAccForm.getForm().setValues(values);
+      },
+      setAccount: function(values) {
+        if(updateAccForm.getForm().getValues().id != values.id) {
+          Ext.Ajax.request({
+            url: 'bts_accounts/update_current.json',
+            method: 'put',
+            params: {
+              id: values.id
+            }
+          }); //no need to display if the request successful?
+        }
+        updateAccForm.updateAccount(values);
       },
       loadAccount: function(id) {
         Ext.Ajax.request({
@@ -125,25 +141,11 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
         });
       },
       rollbackAccount: function() {
-        updateAccForm.getForm().setValues(updateAccForm.oldValues);
-        // OR
-        //var id = updateAccForm.getForm().getFieldValues().id;
-        //Ext.Ajax.request({
-        //  url: 'bts_accounts/show.json' +
-        //       Ext.urlEncode({ id: id }, '?'),
-        //  method: 'get', 
-        //  success: function(resp) {
-        //    var respObj = Ext.util.JSON.decode(resp.responseText); 
-        //    updateAccForm.getForm().setValues(respObj.account);
-        //  },
-        //  failure: function(resp) {
-        //    Ext.Msg.alert('Error', 'unexpected error');//??
-        //  }
-        //});
+        updateAccForm.getForm().setValues(updateAccForm.oldValues);//maybe load data from server
       }
     });
     
-    this.accCombo = new Ext.form.ComboBox({
+    accCombo = this.accCombo = new Ext.form.ComboBox({
       editable: false,
       mode: 'local',
       store: new Ext.data.JsonStore({
@@ -162,9 +164,8 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
         }
       }
     });
-    var accCombo = this.accCombo;
 
-    accFormsCard = new Ext.Panel({
+    accFormsCard = this.accFormsCard = new Ext.Panel({
       layout: 'card',
       width: 350,
       height: 170,
@@ -206,7 +207,27 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
     config.listeners = config.listeners || {};
     Ext.applyIf(config.listeners, {
       show: function(comp) {
-        comp.accCombo.getStore().reload();
+        Ext.Ajax.request({
+          url: 'bts_accounts/show_current.json',
+          method: 'get',
+          success: function(resp) {
+            var respObj = Ext.util.JSON.decode(resp.responseText)
+            if(respObj.success) {
+              comp.accFormsCard.getLayout().setActiveItem(1);
+              comp.updateAccForm.updateAccount(respObj.account);
+              comp.accCombo.getStore().reload({
+                callback: function() {
+                  comp.accCombo.setValue(respObj.account.id);
+                }
+              });
+            } else {
+              comp.accCombo.getStore().reload();//maybe not enough
+            }
+          },
+          failure: function() {
+            Ext.Msg.alert('Connection failure', 'server not responding');//think
+          }
+        });
       }
     });
 

@@ -1,9 +1,9 @@
 ReTrack::Application.routes.draw do
   get 'func/index', 'func/username', 'func/bts_list'
 
-  get 'bts_accounts/list', 'bts_accounts/show'
+  get 'bts_accounts/list', 'bts_accounts/show', 'bts_accounts/show_current'
   post 'bts_accounts/create'
-  put 'bts_accounts/update'
+  put 'bts_accounts/update', 'bts_accounts/update_current'
   delete 'bts_accounts/destroy'
 
   resources :users, :user_sessions
