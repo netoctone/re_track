@@ -1,5 +1,6 @@
 class BtsAccount < ActiveRecord::Base
   belongs_to :user
+  has_many :defect_tracks
 
   include ActiveModel::Validations
   validates_with AuthenticableValidator
