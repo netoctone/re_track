@@ -7,7 +7,7 @@ class BtsAccountsController < ApplicationController
       format.json do
         render json: {
           success: true,
-          accounts: BtsAccount.where(:user_id => current_user.id).map do |acc|
+          accounts: BtsAccount.where(:user_id => current_user_id).map do |acc|
             { id: acc.id, name: acc.name }
           end
         }
@@ -26,8 +26,7 @@ class BtsAccountsController < ApplicationController
 
   # GET /bts_accounts/show_current.json
   def show_current
-    bts_account = BtsAccount.where(:user_id => current_user_id,
-                                   :current => true).first
+    bts_account = BtsAccount.find_current(current_user_id)
     
     respond_to do |format|
       if bts_account
@@ -67,7 +66,7 @@ class BtsAccountsController < ApplicationController
   # PUT /bts_accounts/update_current.json
   def update_current
     #rally connection dependency not good
-    BtsAccount.update_current(params[:id], current_user.id)
+    BtsAccount.update_current(params[:id])
 
     respond_to do |format|
       format.json do

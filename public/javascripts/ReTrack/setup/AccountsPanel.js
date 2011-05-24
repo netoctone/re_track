@@ -32,7 +32,7 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
                 if(action.failureType == Ext.form.Action.CLIENT_INVALID) {
                   Ext.Msg.alert('Data wasn\'t submitted', 'validation error');
                 } else if(action.failureType == Ext.form.Action.SERVER_INVALID) {
-                  Ext.Msg.alert('Account wan\'t created', 'wrong login details');
+                  Ext.Msg.alert('Account wan\'t created', action.result.errormsg);
                 }
               }
             });

@@ -8,14 +8,14 @@ class BtsAccount < ActiveRecord::Base
   validates :name, :uniqueness => true
 
   class << self
-    def update_current id, user_id
-      self.where(:user_id => user_id, :current => true).update_all(:current => false)
-      self.update(id, :current => true)
+    def update_current id
+      record = self.find(id)
+      record.updated_at = Time.now
+      record.save(:validate => false)
     end
-  end
-  def make_current
-    BtsAccount.update_all('current = 0', 'current <> 0') #mysql-specific
-    self.current = true
-    self.save false
+
+    def find_current user_id
+      self.where(:user_id => user_id).order(:updated_at).last
+    end
   end
 end
