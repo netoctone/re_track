@@ -26,19 +26,10 @@ class DefectTrack < ActiveRecord::Base
     def track data
       record = self.find_or_initialize_by_bts_account_id_and_formatted_id(data[:bts_account_id], data[:formatted_id])
 
-      # OR this instead of the rest of a method
-      #data[:end_date] = Time.now if data[:status] == PercentToStatus[90]
-      #data[:start_date] = Time.now if record.start_date.nil? and
-      #                                data[:status] == PercentToStatus[50]
-      #record.update_attributes[data]
-
-      record.end_date = Time.now if data[:status] == PercentToStatus[90]
-      record.start_date ||= Time.now if data[:status] == PercentToStatus[50]
-
-      record.description = data[:description]
-      record.status = data[:status]
-
-      record.save
+      data[:end_date] = Time.now if data[:status] == PercentToStatus[90]
+      data[:start_date] = Time.now if record.start_date.nil? and
+                                      data[:status] == PercentToStatus[50]
+      record.update_attributes(data)
     end
   end
 end
