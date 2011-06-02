@@ -2,9 +2,9 @@ Ext.ns('ReTrack');
 
 ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
   initComponent: function() {
-    var accCombo = null;
-    var accFormsCard = null;
-    var updateAccForm = null;
+    var accCombo = undefined;
+    var accFormsCard = undefined;
+    var updateAccForm = undefined;
     var createAccForm = new ReTrack.AccountForm({
       title: 'New account',
       url: 'bts_accounts/create.json',
@@ -145,22 +145,11 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
       }
     });
     
-    accCombo = this.accCombo = new Ext.form.ComboBox({
-      editable: false,
-      mode: 'local',
-      store: new Ext.data.JsonStore({
-        url: 'bts_accounts/list.json',
-        root: 'accounts',
-        fields: ['id', 'name']
-      }),
-      emptyText: 'no account',
-      valueField: 'id',
-      displayField: 'name',
-      triggerAction: 'all',
+    accCombo = this.accCombo = new ReTrack.AccountsCombo({
       listeners: {
-        select: function(combo, record) {
-          accFormsCard.getLayout().setActiveItem(1);//where are the guerantees?
-          updateAccForm.loadAccount(record.id);
+        accountSelect: function(account) {
+          accFormsCard.getLayout().setActiveItem(1);
+          updateAccForm.updateAccount(account);
         }
       }
     });
@@ -207,27 +196,7 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
     config.listeners = config.listeners || {};
     Ext.applyIf(config.listeners, {
       show: function(comp) {
-        Ext.Ajax.request({
-          url: 'bts_accounts/show_current.json',
-          method: 'get',
-          success: function(resp) {
-            var respObj = Ext.util.JSON.decode(resp.responseText)
-            if(respObj.success) {
-              comp.accFormsCard.getLayout().setActiveItem(1);
-              comp.updateAccForm.updateAccount(respObj.account);
-              comp.accCombo.getStore().reload({
-                callback: function() {
-                  comp.accCombo.setValue(respObj.account.id);
-                }
-              });
-            } else {
-              comp.accCombo.getStore().reload();//maybe not enough
-            }
-          },
-          failure: function() {
-            Ext.Msg.alert('Connection failure', 'server not responding');//think
-          }
-        });
+        comp.accCombo.selectCurrent();
       }
     });
 

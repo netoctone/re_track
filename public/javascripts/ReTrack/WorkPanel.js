@@ -1,9 +1,8 @@
 Ext.ns('ReTrack');
 
-ReTrack.WorkPanel = Ext.extend(Ext.TabPanel, {
+ReTrack.WorkPanel = Ext.extend(ReTrack.ReShowTabPanel, {
   initComponent: function() {
     var config = {
-      activeTab: 0,
       items: [
         new ReTrack.BugsPanel(),
         new ReTrack.ReportsPanel()

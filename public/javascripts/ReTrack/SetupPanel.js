@@ -1,9 +1,8 @@
 Ext.ns('ReTrack');
 
-ReTrack.SetupPanel = Ext.extend(Ext.TabPanel, {
+ReTrack.SetupPanel = Ext.extend(ReTrack.ReShowTabPanel, {
   initComponent: function() {
     var config = {
-      activeItem: 0,
       items: [
         new ReTrack.ProfilePanel(),
         new ReTrack.AccountsPanel(),
