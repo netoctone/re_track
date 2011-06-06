@@ -10,7 +10,7 @@ ReTrack.ReShowTabPanel = Ext.extend(Ext.TabPanel, {
     config = config || {};
     config.listeners = config.listeners || {};
     Ext.applyIf(config.listeners, {
-      activate: function(comp) {
+      afterrender: function(comp) {
         comp.on({
           show: function(comp) {
             comp.getActiveTab().show();

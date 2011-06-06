@@ -3,10 +3,17 @@ Ext.ns('ReTrack');
 ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
   initComponent: function() {
     var comp = this;
-    var accCombo = this.accCombo = new ReTrack.AccountsCombo({
-      listeners: {
-        accountSelect: function(account) {
-          comp.loadGrid(account['bts_account[bts]']);
+    var accCombo = this.accCombo = new ReTrack.FunctionalCombo({
+      functional: {
+        subject: 'bts_account',
+        subjectSelectCallback: {
+          success: function(account) {
+            comp.loadGrid(account['bts_account[bts]']);
+          },
+          failure: function(errormsg) {
+            comp.setGrid();
+            Ext.Msg.alert('Notification', errormsg);
+          }
         }
       }
     });
@@ -51,7 +58,9 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
     if(old) {
       old.destroy();
     }
-    this.add(grid);
+    if(grid) {
+     this.add(grid);
+    }
     this.doLayout();
   },
 
@@ -100,33 +109,14 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
         col.header = name;
       }
       col.dataIndex = name;
-      if(!(colConf.editable != undefined && colConf.editable == false)) {
+      if(!(colConf.editable !== undefined && colConf.editable == false)) {
         if(colConf.type == 'string' || colConf.type == 'text') {
           col.editor = new Ext.form.TextField();
         } else if(colConf.type == 'combo') {
-          var opts = colConf.options;
-          var comboData = [];
-          var comboMap = {};
-          for(var j = 0; j < opts.length; j++) {
-            comboData.push([opts[j].display, opts[j].value]);
-            comboMap[opts[j].value] = opts[j].display;
-          }
-          col.renderer = function(val) {
-            return comboMap[val];
-          }
-          col.editor = new Ext.form.ComboBox({
-            editable: false,
-            mode: 'local',
-            store: new Ext.data.ArrayStore({
-              fields: ['display', 'value'],
-              data: comboData
-            }),
-            emptyText: 'no ' + name,
-            valueField: 'value',
-            displayField: 'display',
-            name: 'defect[' + name + ']',
-            triggerAction: 'all'
-          });
+          combo_and_rend = ReTrack.util.buildComboConfig(name,
+                                                             colConf.options);
+          col.editor = new Ext.form.ComboBox(combo_and_rend.combo);
+          col.renderer = combo_and_rend.renderer;
         }
       }
 
