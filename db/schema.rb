@@ -19,7 +19,6 @@ ActiveRecord::Schema.define(:version => 20110524162050) do
     t.string   "password"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "name"
   end
 
   create_table "defect_tracks", :force => true do |t|
