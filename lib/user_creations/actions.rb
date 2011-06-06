@@ -34,7 +34,7 @@ module UserCreations
           format.json do
             render json: {
               success: false,
-              errormsg: 'No current ' + creation_name
+              errormsg: 'No current ' + creation_name.to_s
             }
           end
         end
@@ -47,7 +47,7 @@ module UserCreations
       user_creation = creation_model.new(params[creation_name])
 
       respond_to do |format|
-        if bts_account.save
+        if user_creation.save
           format.json do
             render json: {
               success: true,
@@ -95,7 +95,7 @@ module UserCreations
       end
     end
 
-    # DELETE /bts_accounts/destroy.json
+    # DELETE /(user_creations)/destroy.json
     def destroy
       user_creation = creation_model.find(params[:id])
       user_creation.destroy #is check needed?
@@ -109,12 +109,22 @@ module UserCreations
       end
     end
 
-    ExcludeColumns = ['user_id', 'created_at', 'updated_at']
+    # GET /(user_creations)/form_data_config.json
+    def form_data_config
+      respond_to do |format|
+        format.json do
+          render json: {
+            success: true,
+            config: self.class.form_data_config
+          }
+        end
+      end
+    end
 
     private
     def user_creation_to_json user_creation
       res = {}
-      (creation_model.column_names - ExcludeColumns).each do |col_name|
+      self.class.form_data_config.each do |col_name, val|
         res["#{creation_name}[#{col_name}]"] = user_creation.send(col_name)
       end
       res['id'] = user_creation.id

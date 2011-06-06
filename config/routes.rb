@@ -1,10 +1,12 @@
 ReTrack::Application.routes.draw do
-  get 'func/index', 'func/username', 'func/bts_list'
+  get 'func/index', 'func/username'
 
   get 'func/defect_grid_config', 'func/defect_show_all'
   put 'func/defect_update'
 
-  get 'bts_accounts/list', 'bts_accounts/show', 'bts_accounts/show_current'
+
+  get 'bts_accounts/list', 'bts_accounts/show',
+      'bts_accounts/show_current', 'bts_accounts/form_data_config'
   post 'bts_accounts/create'
   put 'bts_accounts/update', 'bts_accounts/update_current'
   delete 'bts_accounts/destroy'
