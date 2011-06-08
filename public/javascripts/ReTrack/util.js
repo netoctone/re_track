@@ -40,17 +40,50 @@ ReTrack.util = {
       combo: {
         editable: false,
         mode: 'local',
-        store: new Ext.data.ArrayStore({
+        store: {
+          xtype: 'arraystore',
           fields: ['display', 'value'],
           data: comboData
-        }),
+        },
         emptyText: 'no ' + name,
         valueField: 'value',
         displayField: 'display',
         triggerAction: 'all'
       }
     };
-  } // eo function buildCombo
+  }, // eo function buildCombo
+
+  buildColsAndFieldsConfig: function(config) {
+    var cols = [];
+    var fields = [];
+    for(var name in config) {
+      var colConf = config[name];
+      var col = {};
+      if(colConf.header_name) {
+        col.header = colConf.header_name;
+      } else {
+        col.header = name;
+      }
+      col.dataIndex = name;
+      if(!(colConf.editable === false)) {
+        if(colConf.type == 'string' || colConf.type == 'text') {
+          col.editor = { xtype: 'textfield' };
+        } else if(colConf.type == 'combo') {
+          combo_and_rend = ReTrack.util.buildComboConfig(name,
+                                                             colConf.options);
+          col.editor = Ext.apply(combo_and_rend.combo, { xtype: 'combo' });
+          col.renderer = combo_and_rend.renderer;
+        }
+      }
+
+      cols.push(col);
+      fields.push(name);
+    }
+    return {
+      cols: cols,
+      fields: fields
+    };
+  } // eo function buildGridColModelConfig
 }
 
 //ReTrack.util.recordToFormValues = function(name, obj) {

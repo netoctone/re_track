@@ -97,39 +97,13 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
   },
 
   buildGrid: function(config) {//builds and returns new grid
-    //debugger;
-    var cm = [];
-    var fields = [];
-    for(var name in config) {
-      var colConf = config[name];
-      var col = {};
-      if(colConf.header_name) {
-        col.header = colConf.header_name;
-      } else {
-        col.header = name;
-      }
-      col.dataIndex = name;
-      if(!(colConf.editable !== undefined && colConf.editable == false)) {
-        if(colConf.type == 'string' || colConf.type == 'text') {
-          col.editor = new Ext.form.TextField();
-        } else if(colConf.type == 'combo') {
-          combo_and_rend = ReTrack.util.buildComboConfig(name,
-                                                             colConf.options);
-          col.editor = new Ext.form.ComboBox(combo_and_rend.combo);
-          col.renderer = combo_and_rend.renderer;
-        }
-      }
-
-      cm.push(col);
-      fields.push(name);
-    }
+    var cols_and_fields = ReTrack.util.buildColsAndFieldsConfig(config);
+    var cols = cols_and_fields.cols;
+    var fields = cols_and_fields.fields;
     return new Ext.grid.EditorGridPanel({
       itemId: 'defectGrid',
-      //viewConfig: {
-      //  forceFit: true
-      //},
       border: false,
-      ds: new Ext.data.JsonStore({//handle errors (bts not available ...
+      ds: new Ext.data.JsonStore({//handle errors (bts not available ...)
         proxy: new Ext.data.HttpProxy({
           url: 'func/defect_show_all.json',
           timeout: 10*60*1000
@@ -140,7 +114,7 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
       }),
       cm: new Ext.grid.ColumnModel({
         defaultSortable: false,
-        columns: cm
+        columns: cols
       }),
       clicksToEdit: 1,
       listeners: {
