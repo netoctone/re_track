@@ -10,7 +10,19 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110524162050) do
+ActiveRecord::Schema.define(:version => 20110602122059) do
+
+  create_table "account_groups", :force => true do |t|
+    t.integer  "user_id"
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "account_groups_bts_accounts", :id => false, :force => true do |t|
+    t.integer "account_group_id"
+    t.integer "bts_account_id"
+  end
 
   create_table "bts_accounts", :force => true do |t|
     t.integer  "user_id"
