@@ -4,7 +4,9 @@ Ext.apply(ReTrack.functional, {
   loadFunctionalEdit: function(config) {
     var conf = {
       subject: config.functional.subject,
-      controller: ReTrack.util.pluralize(config.functional.subject)
+      controller: ReTrack.util.pluralize(config.functional.subject),
+      cardConf: config.functional.formCard,
+      formConf: config.functional.form
     };
 
     if(config && config.functional && config.functional.callback) {
@@ -48,7 +50,7 @@ Ext.apply(ReTrack.functional, {
     });
   }, // eo function loadContent
 
-  buildFormItems: function(conf, formConfig) {
+  buildFormItemsConfig: function(conf, formConfig) {
     var items = [];
     for(var name in formConfig) {
       var itemConf = formConfig[name];
@@ -78,12 +80,13 @@ Ext.apply(ReTrack.functional, {
 
   buildContent: function(conf, formConfig) {
     var funcCombo = undefined;
-    var createFormItems = ReTrack.functional.buildFormItems(conf, formConfig);
-    var createForm = new Ext.form.FormPanel({
-      title: 'New ' + conf.subject,
+    var formItemsConfig = ReTrack.functional.buildFormItemsConfig(conf,
+                                                                  formConfig);
+    var createForm = new Ext.form.FormPanel(Ext.applyIf({
       url: conf.controller + '/create.json',
       border: false,
-      items: createFormItems,
+      autoHeight: true,
+      items: formItemsConfig,
       buttons: [
         {
           text: 'Create',
@@ -113,14 +116,13 @@ Ext.apply(ReTrack.functional, {
           }
         }
       ]
-    }); // eo createForm create
+    }, conf.formConf)); // eo createForm create
 
     var formCard = undefined;
-    var updateFormItems = ReTrack.functional.buildFormItems(conf, formConfig);
-    var updateForm = new Ext.form.FormPanel({
-      title: conf.subject,
+    var updateForm = new Ext.form.FormPanel(Ext.applyIf({
       border: false,
-      items: updateFormItems,
+      autoHeight: true,
+      items: formItemsConfig,
       buttons: [
         {
           text: 'Delete',
@@ -184,7 +186,7 @@ Ext.apply(ReTrack.functional, {
           }
         } // eo 'Update' button config
       ]
-    });// eo updateForm create
+    }, conf.formConf));// eo updateForm create
     updateForm.add({
       xtype: 'hidden',
       name: 'id'
@@ -215,16 +217,14 @@ Ext.apply(ReTrack.functional, {
       }
     });
 
-    formCard = new Ext.Panel({
+    formCard = new Ext.Panel(Ext.applyIf({
       layout: 'card',
-      width: 350,
-      height: 170,
       activeItem: 0,
       items: [
         createForm,
         updateForm
       ]
-    });
+    }, conf.cardConf));
 
     return {
       combo: funcCombo,

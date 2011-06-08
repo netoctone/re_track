@@ -34,6 +34,13 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
     ReTrack.functional.loadFunctionalEdit({
       functional: {
         subject: 'bts_account',
+        form: {
+          labelWidth: 60
+        },
+        formCard: {
+          title: 'Account',
+          width: 340
+        },
         callback: {
           load: {
             success: function(combo, buttonNew, formCard) {
