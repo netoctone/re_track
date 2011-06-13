@@ -11,6 +11,12 @@ ReTrack::Application.routes.draw do
   put 'bts_accounts/update', 'bts_accounts/update_current'
   delete 'bts_accounts/destroy'
 
+  get 'report_accounts/list', 'report_accounts/show',
+      'report_accounts/show_current', 'report_accounts/form_data_config'
+  post 'report_accounts/create'
+  put 'report_accounts/update', 'report_accounts/update_current'
+  delete 'report_accounts/destroy'
+
   get 'account_groups/list', 'account_groups/show',
       'account_groups/show_current', 'account_groups/form_data_config'
   post 'account_groups/create'

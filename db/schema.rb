@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110602122059) do
+ActiveRecord::Schema.define(:version => 20110609110913) do
 
   create_table "account_groups", :force => true do |t|
     t.integer  "user_id"
@@ -40,6 +40,15 @@ ActiveRecord::Schema.define(:version => 20110602122059) do
     t.integer  "status"
     t.datetime "start_date"
     t.datetime "end_date"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "report_accounts", :force => true do |t|
+    t.integer  "user_id"
+    t.string   "service"
+    t.string   "login"
+    t.string   "password"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
