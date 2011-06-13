@@ -27,6 +27,20 @@ class FuncController < ApplicationController
     end
   end
 
+  # GET /func/bts_list.json
+  def bts_list
+    respond_to do |format|
+      format.json do
+        render json: {
+          success: true,
+          list: Bts.list.map do |bts|
+            { display: bts.name, value: bts.name }
+          end
+        }
+      end
+    end
+  end
+
   # GET /func/defect_grid_config.json
   def defect_grid_config
     session[:bts] = nil

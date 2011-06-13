@@ -1,5 +1,5 @@
 ReTrack::Application.routes.draw do
-  get 'func/index', 'func/username'
+  get 'func/index', 'func/username', 'func/bts_list'
 
   get 'func/defect_grid_config', 'func/defect_show_all'
   put 'func/defect_update'
@@ -10,6 +10,17 @@ ReTrack::Application.routes.draw do
   post 'bts_accounts/create'
   put 'bts_accounts/update', 'bts_accounts/update_current'
   delete 'bts_accounts/destroy'
+
+  get 'account_groups/list', 'account_groups/show',
+      'account_groups/show_current', 'account_groups/form_data_config'
+  post 'account_groups/create'
+  put 'account_groups/update', 'account_groups/update_current'
+  delete 'account_groups/destroy'
+
+  get 'account_groups/acc_list', 'account_groups/acc_add_list'
+  post 'account_groups/add_acc'
+  delete 'account_groups/remove_acc'
+
 
   resources :users, :user_sessions
 
