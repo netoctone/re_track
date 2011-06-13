@@ -14,7 +14,7 @@ class BtsAccountsController < ApplicationController
     :bts => {
       :label => :BTS,
       :type => :combo,
-      :options => Bts.bts_list.map do |bts|
+      :options => WebAPI::Bts.list.map do |bts|
         { :display => bts.name, :value => bts.name }
       end
     }

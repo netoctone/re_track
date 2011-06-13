@@ -33,7 +33,7 @@ class FuncController < ApplicationController
       format.json do
         render json: {
           success: true,
-          list: Bts.list.map do |bts|
+          list: WebAPI::Bts.list.map do |bts|
             { display: bts.name, value: bts.name }
           end
         }
@@ -77,7 +77,7 @@ class FuncController < ApplicationController
             success: true,
             defects: defects
           }
-        rescue WebAPINotAvailableError => e
+        rescue WebAPI::NotAvailableError => e
           render json: {
             success: false,
             errormsg: e.message

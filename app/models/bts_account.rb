@@ -8,9 +8,13 @@ class BtsAccount < ActiveRecord::Base
   validates_with AuthenticableValidator
 
   validates :bts, :login, :password, :presence => true
-  # (bts, login) pair must be unique
+  # (bts, login) pair must be unique (plus user_id ?)
 
   def name
     "#{bts} // #{login}"
+  end
+
+  def service
+    bts
   end
 end
