@@ -32,8 +32,6 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
   }, //eo function initComponent
 
   constructor: function(config) {
-    var comp = this;
-
     config = config || {};
     config.listeners = config.listeners || {};
     Ext.applyIf(config.listeners, {

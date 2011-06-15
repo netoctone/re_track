@@ -5,8 +5,9 @@ Ext.apply(ReTrack.functional, {
     var conf = {
       subject: config.functional.subject,
       controller: ReTrack.util.pluralize(config.functional.subject),
-      cardConf: config.functional.formCard,
-      formConf: config.functional.form
+      comboConf: config.functional.combo,
+      formConf: config.functional.form,
+      cardConf: config.functional.formCard
     };
 
     if(config && config.functional && config.functional.callback) {
@@ -50,6 +51,7 @@ Ext.apply(ReTrack.functional, {
     });
   }, // eo function loadContent
 
+  //deprecated, use ReTrack.FunctionalForm instead
   buildFormItemsConfig: function(conf, formConfig) {
     var items = [];
     for(var name in formConfig) {
@@ -70,8 +72,9 @@ Ext.apply(ReTrack.functional, {
         }
       } else if(itemConf.type == 'combo') {
         item.xtype = 'combo';
-        Ext.apply(item,
-                  ReTrack.util.buildComboConfig(name, itemConf.options).combo);
+        var combo_and_help = ReTrack.util.buildComboConfig(name,
+                                                           itemConf.options);
+        Ext.apply(item, combo_and_help.combo);
       }
       items.push(item);
     }
@@ -80,78 +83,57 @@ Ext.apply(ReTrack.functional, {
 
   buildContent: function(conf, formConfig) {
     var funcCombo = undefined;
-    var formItemsConfig = ReTrack.functional.buildFormItemsConfig(conf,
-                                                                  formConfig);
-    var createForm = new Ext.form.FormPanel(Ext.applyIf({
-      url: conf.controller + '/create.json',
+    var createForm = new ReTrack.FunctionalForm(Ext.applyIf({
+      functional: {
+        subject: conf.subject,
+        dataConfig: formConfig
+      },
       border: false,
       autoHeight: true,
-      items: formItemsConfig,
       buttons: [
         {
           text: 'Create',
           type: 'submit',
           handler: function() {
-            createForm.getForm().submit({
-              waitMsg: 'Creating...',
-              success: function(form, action) {
-                var values = form.getValues();
-                form.reset();
-                Ext.apply(values, { id: action.result.id });
-                funcCombo.selectNewById(values.id);
+            createForm.submitCreate({
+              success: function(id) {
+                funcCombo.selectNewById(id);
                 //notification?
               },
-              failure: function(form, action) {
-                var failureType = action.failureType;
-                if(failureType == Ext.form.Action.CLIENT_INVALID) {
-                  Ext.Msg.alert('Error', 'Data isn\'t valid');
-                } else if(failureType == Ext.form.Action.CONNECT_FAILURE) {
-                  Ext.Msg.alert('Connection failure', 'Server not responding');
-                } else if(failureType == Ext.form.Action.SERVER_INVALID) {
-                  Ext.Msg.alert(conf.subject + ' hasn\'t created',
-                                action.result.errormsg);
-                }
+              failure: function(errormsg) {
+                Ext.Msg.alert('Error', errormsg);
               }
             });
           }
         }
       ]
-    }, conf.formConf)); // eo createForm create
+    }, conf.formConf)); // eo createForm creation
 
     var formCard = undefined;
-    var updateForm = new Ext.form.FormPanel(Ext.applyIf({
+    var updateForm = new ReTrack.FunctionalForm(Ext.applyIf({
+      functional: {
+        subject: conf.subject,
+        dataConfig: formConfig
+      },
       border: false,
       autoHeight: true,
-      items: formItemsConfig,
       buttons: [
         {
           text: 'Delete',
           type: 'submit',
           handler: function() {
-            Ext.Ajax.request({
-              url: conf.controller + '/destroy.json',
-              method: 'delete',
-              params: {
-                id: updateForm.getForm().getValues().id
-              },
-              success: function(resp) {
-                var respObj = Ext.util.JSON.decode(resp.responseText);
-                if(respObj.success) {
-                  //unset validation highlight
-                  funcCombo.setValue('');
-                  formCard.getLayout().setActiveItem(0);
-                  if(conf.deselectCallback) {
-                    conf.deselectCallback();
-                  }
-                  funcCombo.selectCurrent();
-                  Ext.Msg.alert('Notification', conf.subject + ' deleted');
-                } else {
-                  Ext.Msg.alert('Error', 'Can\'t delete ' + conf.subject);
+            updateForm.requestDelete({
+              success: function() {
+                funcCombo.setValue('');
+                formCard.getLayout().setActiveItem(0);
+                if(conf.deselectCallback) {
+                  conf.deselectCallback();
                 }
+                funcCombo.selectCurrent();
+                Ext.Msg.alert('Notification', conf.subject + ' deleted');
               },
-              failure: function() {
-                //think
-                Ext.Msg.alert('Connection failure', 'Server not responding');
+              failure: function(errormsg) {
+                Ext.Msg.alert('Error', errormsg);
               }
             });
           }
@@ -160,27 +142,13 @@ Ext.apply(ReTrack.functional, {
           text: 'Update',
           type: 'submit',
           handler: function() {
-            updateForm.getForm().submit({
-              url: conf.controller + '/update.json',
-              method: 'put',
-              waitMsg: 'Updating ...',
-              success: function(form, action) {
-                var values = action.result.subject;
+            updateForm.submitUpdate({
+              success: function() {
                 funcCombo.updateCurrentName();
-                updateForm.updateSubject(values);
                 //Ext.Msg.alert('Notification', comp.func.subject + ' updated');
               },
-              failure: function(form, action) {
-                var failureType = action.failureType;
-                if(failureType == Ext.form.Action.CLIENT_INVALID) {
-                  Ext.Msg.alert('Error', 'Data isn\'t valid');
-                } else if(failureType == Ext.form.Action.CONNECT_FAILURE) {
-                  Ext.Msg.alert('Connection failure', 'Server not responding');
-                } else if(failureType == Ext.form.Action.SERVER_INVALID) {
-                  Ext.Msg.alert(conf.subject + ' hasn\'t updated',
-                                action.result.errormsg);//is it true?
-                }
-                updateForm.rollbackSubject();
+              failure: function(errormsg) {
+                Ext.Msg.alert('Error', errormsg);
               }
             });
           }
@@ -191,18 +159,10 @@ Ext.apply(ReTrack.functional, {
       xtype: 'hidden',
       name: 'id'
     });
-    Ext.apply(updateForm, {
-      updateSubject: function(values) {
-        updateForm.oldValues = values;
-        updateForm.getForm().setValues(values);
-      },
-      rollbackSubject: function() {
-        //maybe load data from server
-        updateForm.getForm().setValues(updateForm.oldValues);
-      }
-    });
 
-    funcCombo = ReTrack.functional.buildCombo(conf.subject, {
+    funcCombo = ReTrack.functional.buildCombo({
+      subject: conf.subject,
+      config: conf.comboConf,
       success: function(subject) {
         formCard.getLayout().setActiveItem(1);
         updateForm.updateSubject(subject);
@@ -243,19 +203,19 @@ Ext.apply(ReTrack.functional, {
     };
   }, // eo function buildContent
 
-  buildCombo: function(subject, callback) {
-    return new ReTrack.FunctionalCombo({
+  buildCombo: function(conf) {
+    return new ReTrack.FunctionalCombo(Ext.apply({
       functional: {
-        subject: subject,
+        subject: conf.subject,
         subjectSelectCallback: {
           success: function(subject) {
-            callback.success(subject);
+            conf.success(subject);
           },
           failure: function(errormsg) {
-            callback.failure(errormsg);
+            conf.failure(errormsg);
           }
         }
       }
-    });
+    }, conf.config));
   } // eo function buildCombo
 });

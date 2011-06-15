@@ -48,7 +48,7 @@ ReTrack.FunctionalCombo = Ext.extend(Ext.form.ComboBox, {
               url: func.controller + '/show_current.json',
               method: 'get',
               success: function(resp) {
-                var respObj = Ext.util.JSON.decode(resp.responseText);
+                var respObj = Ext.decode(resp.responseText);
                 if(respObj.success) {
                   comp.setValue(respObj[func.subject].id);
                   callback.success(respObj[func.subject]);
@@ -105,7 +105,7 @@ ReTrack.FunctionalCombo = Ext.extend(Ext.form.ComboBox, {
                Ext.urlEncode({ id: id }, '?'),
           method: 'get',
           success: function(resp) {
-            var respObj = Ext.util.JSON.decode(resp.responseText);
+            var respObj = Ext.decode(resp.responseText);
             if(respObj.success) {
               callback.success(respObj[func.subject]);
             } else {

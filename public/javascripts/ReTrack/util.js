@@ -5,6 +5,13 @@ ReTrack.util = {
     return name + 's';
   },
 
+  isEmpty: function(obj) {
+    for(var i in obj) {
+      return false;
+    }
+    return true;
+  },
+
   buildCallback: function(funConfig, defConfig) {
     var result = {
       success: function() {},
@@ -29,14 +36,19 @@ ReTrack.util = {
   buildComboConfig: function(name, opts) {
     var comboData = [];
     var comboMap = {};
+    var comboAddMap = {};
     for(var j = 0; j < opts.length; j++) {
       comboData.push([opts[j].display, opts[j].value]);
       comboMap[opts[j].value] = opts[j].display;
+      if(opts[j].add) {
+        comboAddMap[opts[j].value] = opts[j].add;
+      }
     }
     return {
       renderer: function(val) {
         return comboMap[val];
       },
+      valueToAddConfMap: comboAddMap,
       combo: {
         editable: false,
         mode: 'local',

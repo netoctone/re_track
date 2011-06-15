@@ -49,14 +49,6 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
             failure: function(errormsg) {
               Ext.Msg.alert('Error', errormsg);
             }
-          },
-          subjectSelect: {
-            success: function(account) {
-            },
-            failure: function(errormsg) {
-            }
-          },
-          subjectDeselect: function() {//can't fail
           }
         }
       }
@@ -64,12 +56,11 @@ ReTrack.AccountsPanel = Ext.extend(Ext.Panel, {
   },
 
   buildSelf: function(combo, button, card) {
-    this.combo = combo;
-
     this.topBar.add([combo, button]);
     this.add(card);
     this.doLayout();
 
+    this.combo = combo;
     combo.selectCurrent();
   }
 });
