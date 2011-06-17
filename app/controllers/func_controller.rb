@@ -71,7 +71,8 @@ class FuncController < ApplicationController
           bts_class = bts_account.bts.constantize
           bts = session[:bts]
           bts = bts_class.new(:login => bts_account.login,
-                              :password => bts_account.password) unless bts
+                              :password => bts_account.password,
+                              :url => bts_account.url) unless bts
           defects = bts.find_defects
           session[:bts] = bts
           render json: {
@@ -98,7 +99,8 @@ class FuncController < ApplicationController
           bts_class = bts_account.bts.constantize
           bts = session[:bts]
           bts = bts_class.new(:login => bts_account.login,
-                              :password => bts_account.password) unless bts
+                              :password => bts_account.password,
+                              :url => bts_account.url) unless bts
           bts.update_defect(params[:defect]) # must raise if update fails
           session[:bts] = bts
           track_data = bts_class.params_to_track_data(params[:defect])
