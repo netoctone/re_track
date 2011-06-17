@@ -1,9 +1,10 @@
 class AuthenticableValidator < ActiveModel::Validator
   def validate(record)
-    unless record.service.constantize.authenticable?(record.login,
-                                                     record.password)
-      record.errors[:base] << "Login details must be authenticable"
-    end
+    details = {
+      :login => record.login,
+      :password => record.password
+    }
+    record.service.constantize.new details
   rescue WebAPI::Error => e
     record.errors[:base] << e.message
   end

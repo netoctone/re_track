@@ -61,28 +61,18 @@ module WebAPI
       }
     })
 
-    class << self
-      #
-      # returns nil if cannot authenticate with given username and password
-      # thus returns nil if account is blocked
-      #
-      def authenticable? username, password
-        self.new username, password
-      rescue Rally::NotAuthenticatedError => e
-        ::Rails.logger.info e.message
-        nil
-      end
-    end
-
-    def initialize username, password
-      @rally_api = RallyRestAPI.new :username => username,
-                                    :password => password,
+    def initialize details={}
+      @rally_api = RallyRestAPI.new :username => details[:login],
+                                    :password => details[:password],
                                     :logger => ::Rails.logger
-      @username = username
+      @username = details[:login]
       @start_index = 0
     rescue NoMethodError, SocketError => e
-      ::Rails.logger.info "RallyRestAPI#new raised error: #{e.class}: #{e}"
+      ::Rails.logger.info "RallyRestAPI::new raised error: " \
+                          "#{e.class}: #{e.message}"
       raise NotAvailableError, 'Rally server is not available'
+    rescue Rally::NotAuthenticatedError => e
+      raise NotAuthenticatedError, e.message
     end
 
     def find_defects quant=2

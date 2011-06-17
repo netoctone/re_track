@@ -70,14 +70,15 @@ class FuncController < ApplicationController
         begin
           bts_class = bts_account.bts.constantize
           bts = session[:bts]
-          bts = session[:bts] = bts_class.new(bts_account.login,
-                                              bts_account.password) unless bts
+          bts = bts_class.new(:login => bts_account.login,
+                              :password => bts_account.password) unless bts
           defects = bts.find_defects
+          session[:bts] = bts
           render json: {
             success: true,
             defects: defects
           }
-        rescue WebAPI::NotAvailableError => e
+        rescue WebAPI::Error => e
           render json: {
             success: false,
             errormsg: e.message
@@ -96,9 +97,10 @@ class FuncController < ApplicationController
         begin
           bts_class = bts_account.bts.constantize
           bts = session[:bts]
-          bts = session[:bts] = bts_class.new(bts_account.login,
-                                              bts_account.password) unless bts
+          bts = bts_class.new(:login => bts_account.login,
+                              :password => bts_account.password) unless bts
           bts.update_defect(params[:defect]) # must raise if update fails
+          session[:bts] = bts
           track_data = bts_class.params_to_track_data(params[:defect])
           track_data[:bts_account_id] = bts_account.id
           begin
