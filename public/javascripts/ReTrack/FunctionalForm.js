@@ -19,8 +19,10 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
         item.fieldLabel = name;
       }
       item.name = func.subject + '[' + name + ']';
-      item.allowBlank = false;
-      item.blankText = name + ' is required';
+      if(!(itemConf.required === false)) {
+        item.allowBlank = false;
+        item.blankText = name + ' is required';
+      }
       if(itemConf.type == 'string') {
         item.xtype = 'textfield';
         if(name == 'password') {
@@ -211,6 +213,7 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
     for(var i = 0; i != addComboList.length; i++) {
       addComboList[i].updateAddition();
     }
+    this.getForm().setValues(values); //think
   },
 
   //private method

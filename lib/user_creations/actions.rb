@@ -126,6 +126,11 @@ module UserCreations
       res = {}
       self.class.form_data_config.each do |col_name, val|
         res["#{creation_name}[#{col_name}]"] = user_creation.send(col_name)
+        if val[:type].equal?(:combo) && val[:add]
+          val[:add].each do |col_name|
+            res["#{creation_name}[#{col_name}]"] = user_creation.send(col_name)
+          end
+        end
       end
       res['id'] = user_creation.id
       res
