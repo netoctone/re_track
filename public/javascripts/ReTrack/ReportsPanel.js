@@ -109,7 +109,7 @@ ReTrack.ReportsPanel = Ext.extend(Ext.Panel, {
                   tracks[i] = new DataRecord(tracks[i]);
                 }
                 var store = grid.getStore();
-                store.removeAll(true);
+                store.removeAll();
                 store.add(tracks);
               },
               failure: function(form, action) {
