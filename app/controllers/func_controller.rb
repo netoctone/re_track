@@ -68,13 +68,7 @@ class FuncController < ApplicationController
     respond_to do |format|
       format.json do
         begin
-          bts_class = bts_account.bts.constantize
-          bts = session[:bts]
-          bts = bts_class.new(:login => bts_account.login,
-                              :password => bts_account.password,
-                              :url => bts_account.url) unless bts
-          defects = bts.find_defects
-          session[:bts] = bts
+          defects = build_bts(bts_account).find_defects
           render json: {
             success: true,
             defects: defects
@@ -96,15 +90,13 @@ class FuncController < ApplicationController
     respond_to do |format|
       format.json do
         begin
+          # must raise if update fails
+          build_bts(bts_account).update_defect(params[:defect])
+
           bts_class = bts_account.bts.constantize
-          bts = session[:bts]
-          bts = bts_class.new(:login => bts_account.login,
-                              :password => bts_account.password,
-                              :url => bts_account.url) unless bts
-          bts.update_defect(params[:defect]) # must raise if update fails
-          session[:bts] = bts
           track_data = bts_class.params_to_track_data(params[:defect])
           track_data[:bts_account_id] = bts_account.id
+
           begin
             DefectTrack.track(track_data)
             render json: {
@@ -124,6 +116,77 @@ class FuncController < ApplicationController
           }
         end
       end
+    end
+  end
+
+  # GET /func/track_show_report_by_date.json
+  def track_show_report_by_date
+    params[:from] = Time.strptime(params[:from], '%m/%d/%Y')
+    params[:to] = Time.strptime(params[:to], '%m/%d/%Y')
+
+    respond_to do |format|
+      format.json do
+        if acc_group = AccountGroup.find_current(current_user_id)
+          tracks = {}
+          acc_group.bts_accounts.each do |bts_acc|
+            acc_tracks = []
+            acc_tracks += DefectTrack.find(:all, :conditions => {
+              :bts_account_id => bts_acc.id,
+              :start_date => params[:from]..params[:to]
+            })
+            acc_tracks |= DefectTrack.find(:all, :conditions => {
+              :bts_account_id => bts_acc.id,
+              :end_date => params[:from]..params[:to]
+            })
+            tracks[bts_acc] = acc_tracks unless acc_tracks.empty?
+          end
+
+          res = []
+          tracks.each do |acc, tracks|
+            user = acc.user
+            res += tracks.map do |track|
+              {
+                user_name: user.fullname,
+                bts_account_name: acc.name,
+                formatted_id: track.formatted_id,
+                description: track.description,
+                start_date: track.start_date,
+                end_date: track.end_date,
+                status_name: DefectTrack::NameOfStatus[track.status],
+                status_percent: "#{DefectTrack::PercentOfStatus[track.status]}%"
+              }
+            end
+          end
+
+          render json: {
+            success: true,
+            tracks: res
+          }
+        else
+          render json: {
+            success: false,
+            errormsg: 'No current account group'
+          }
+        end
+      end
+    end
+  end
+
+  def track_send_report_by_date
+  end
+
+  private
+
+  def build_bts bts_account
+    bts_class = bts_account.bts.constantize
+    if bts_dump = session[:bts_dump]
+       bts_class.new(bts_dump)
+    else
+       bts = bts_class.new(:login => bts_account.login,
+                           :password => bts_account.password,
+                           :url => bts_account.url)
+       session[:bts_dump] = bts.dump
+       bts
     end
   end
 

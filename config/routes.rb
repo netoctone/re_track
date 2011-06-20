@@ -28,6 +28,8 @@ ReTrack::Application.routes.draw do
   delete 'account_groups/remove_acc'
 
 
+  get 'func/track_show_report_by_date'
+
   resources :users, :user_sessions
 
   # The priority is based upon order of creation:
