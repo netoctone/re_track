@@ -24,6 +24,7 @@ gem 'mysql2', '0.2.7'
 # gem 'aws-s3', :require => 'aws/s3'
 gem 'authlogic'
 gem 'rally_rest_api'
+gem 'jira4r'
 gem 'gdocs4ruby'
 
 # Bundle gems for the local environment. Make sure to

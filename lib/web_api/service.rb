@@ -1,9 +1,5 @@
 module WebAPI
 
-  class Error < ::StandardError; end
-  class NotAvailableError < Error; end
-  class NotAuthenticatedError < Error; end
-
   class Service
     def self.inherited descendant
       if self.equal?(Service)

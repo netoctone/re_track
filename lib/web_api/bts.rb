@@ -83,7 +83,6 @@ module WebAPI
             # bts_to_track - conversion of defect's value from bts to track
             result[:bts_to_track] = ->(val){ bts_to_track[val] }
             result[:bts_of_track] = ->(val){ bts_of_track[val] }
-            ::Rails.logger.info bts_to_track
           elsif map.kind_of? Hash
             if bts_to_track = map[:bts_to_track]
               result[:bts_to_track] = bts_to_track
