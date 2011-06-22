@@ -121,30 +121,14 @@ class FuncController < ApplicationController
 
   # GET /func/track_show_report_by_date.json
   def track_show_report_by_date
-    params[:from] = Time.strptime(params[:from], '%m/%d/%Y')
-    params[:to] = Time.strptime(params[:to], '%m/%d/%Y')
-
     respond_to do |format|
       format.json do
-        if acc_group = AccountGroup.find_current(current_user_id)
-          tracks = {}
-          acc_group.bts_accounts.each do |bts_acc|
-            acc_tracks = []
-            acc_tracks += DefectTrack.find(:all, :conditions => {
-              :bts_account_id => bts_acc.id,
-              :start_date => params[:from]..params[:to]
-            })
-            acc_tracks |= DefectTrack.find(:all, :conditions => {
-              :bts_account_id => bts_acc.id,
-              :end_date => params[:from]..params[:to]
-            })
-            tracks[bts_acc] = acc_tracks unless acc_tracks.empty?
-          end
-
-          res = []
+        if tracks = build_tracks(Time.strptime(params[:from], '%m/%d/%Y'),
+                                 Time.strptime(params[:to], '%m/%d/%Y'))
+          tr = []
           tracks.each do |acc, tracks|
             user = acc.user
-            res += tracks.map do |track|
+            tr += tracks.map do |track|
               {
                 user_name: user.fullname,
                 bts_account_name: acc.name,
@@ -160,7 +144,7 @@ class FuncController < ApplicationController
 
           render json: {
             success: true,
-            tracks: res
+            tracks: tr
           }
         else
           render json: {
@@ -172,7 +156,29 @@ class FuncController < ApplicationController
     end
   end
 
-  def track_send_report_by_date
+  def track_save_report_by_date
+    respond_to do |format|
+      format.json do
+        begin
+          report_acc = ReportAccount.find_current current_user_id
+          tracks = build_tracks(Time.strptime(params[:from], '%m/%d/%Y'),
+                                Time.strptime(params[:to], '%m/%d/%Y'))
+          service = report_acc.service.constantize.new({
+            :login => report_acc.login,
+            :password => report_acc.password
+          }).save_report(params[:name], tracks)
+
+          render json: {
+            success: true
+          }
+        rescue WebAPI::Error => e
+          render json: {
+            success: false,
+            errormsg: e.message
+          }
+        end
+      end
+    end
   end
 
   private
@@ -187,6 +193,25 @@ class FuncController < ApplicationController
                            :url => bts_account.url)
        session[:bts_dump] = bts.dump
        bts
+    end
+  end
+
+  def build_tracks from_time, to_time
+    if acc_group = AccountGroup.find_current(current_user_id)
+      tracks = {}
+      acc_group.bts_accounts.each do |bts_acc|
+        acc_tracks = []
+        acc_tracks += DefectTrack.find(:all, :conditions => {
+          :bts_account_id => bts_acc.id,
+          :start_date => from_time..to_time
+        })
+        acc_tracks |= DefectTrack.find(:all, :conditions => {
+          :bts_account_id => bts_acc.id,
+          :end_date => from_time..to_time
+        })
+        tracks[bts_acc] = acc_tracks unless acc_tracks.empty?
+      end
+      tracks
     end
   end
 
