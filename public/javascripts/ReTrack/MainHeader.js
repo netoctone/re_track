@@ -45,7 +45,18 @@ ReTrack.MainHeader = Ext.apply(Ext.extend(Ext.Panel, {
     
     Ext.apply(this, Ext.apply(this.initialConfig, config));
 
-    ReTrack.MainHeader.superclass.initComponent.apply(this, arguments); 
+    ReTrack.MainHeader.superclass.initComponent.apply(this, arguments);
+
+    Ext.Ajax.request({
+      url: 'func/username.json',
+      success: function(resp) {
+        var respObj = Ext.decode(resp.responseText);
+        if(respObj.success) {
+          logoutToolbar.insert(1, 'Welcome ' + respObj.username, '|');
+          logoutToolbar.doLayout();
+        } // nothing to show in case of error
+      }
+    });
   } // eo function initComponent
 }),
 {
