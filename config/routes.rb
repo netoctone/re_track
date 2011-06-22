@@ -29,6 +29,7 @@ ReTrack::Application.routes.draw do
 
 
   get 'func/track_show_report_by_date'
+  post 'func/track_save_report_by_date'
 
   resources :users, :user_sessions
 

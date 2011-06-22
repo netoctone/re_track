@@ -46,6 +46,8 @@ ReTrack.ReportsPanel = Ext.extend(Ext.Panel, {
   },
 
   buildSelf: function() {
+    var comp = this;
+
     var fields = [
       'user_name', 'bts_account_name',
       'formatted_id', 'description',
@@ -77,6 +79,39 @@ ReTrack.ReportsPanel = Ext.extend(Ext.Panel, {
       })
     });
 
+    var saveBar = new Ext.Toolbar({
+      items: [
+        {
+          text: 'Save',
+          type: 'submit',
+          handler: function() {
+            Ext.Msg.prompt('Saving', 'Enter report name', function(btn, txt) {
+              if(btn === 'ok') {
+                Ext.Ajax.request({
+                  url: 'func/track_save_report_by_date',
+                  params: Ext.apply({ name: txt }, saveBar.formValues),
+                  method: 'post',
+                  success: function(resp) {
+                    var respObj = Ext.decode(resp.responseText);
+                    if(respObj.success) {
+                      Ext.Msg.alert("Notification",
+                                    "Report '" + txt + "' successfully saved");
+                    } else {
+                      Ext.Msg.alert('Error', respObj.errormsg);
+                    }
+                  },
+                  failure: function() {
+                    Ext.Msg.alert('Error', 'Server not responding');
+                  }
+                });
+              }
+            });
+          }
+        }
+      ],
+      hidden: true
+    });
+
     var form = new Ext.form.FormPanel({
       border: false,
       autoHeight: true,
@@ -100,10 +135,11 @@ ReTrack.ReportsPanel = Ext.extend(Ext.Panel, {
           text: 'Generate',
           type: 'submit',
           handler: function() {
+            form.lastSubmitValues = form.getForm().getValues();
             form.getForm().submit({
               url: 'func/track_show_report_by_date.json',
               method: 'get',
-              success: function(form, action) {
+              success: function(basic_form, action) {
                 var tracks = action.result.tracks;
                 for(var i = 0; i != tracks.length; i++) {
                   tracks[i] = new DataRecord(tracks[i]);
@@ -111,8 +147,15 @@ ReTrack.ReportsPanel = Ext.extend(Ext.Panel, {
                 var store = grid.getStore();
                 store.removeAll();
                 store.add(tracks);
+                if(tracks.length == 0) {
+                  saveBar.setVisible(false);
+                } else {
+                  saveBar.formValues = form.lastSubmitValues;
+                  saveBar.setVisible(true);
+                }
+                comp.doLayout();
               },
-              failure: function(form, action) {
+              failure: function(basic_form, action) {
                 var errormsg = '';
                 var failureType = action.failureType;
                 if(failureType == Ext.form.Action.CLIENT_INVALID) {
@@ -130,7 +173,7 @@ ReTrack.ReportsPanel = Ext.extend(Ext.Panel, {
       ]
     });
 
-    this.add([
+    comp.add([
       {
         border: true,
         autoHeight: true,
@@ -140,6 +183,7 @@ ReTrack.ReportsPanel = Ext.extend(Ext.Panel, {
           form
         ]
       },
+      saveBar,
       {
         flex: 1,
         border: false,
@@ -149,6 +193,6 @@ ReTrack.ReportsPanel = Ext.extend(Ext.Panel, {
         ]
       }
     ]);
-    this.doLayout();
+    comp.doLayout();
   }, // eo function buildSelf
 });
