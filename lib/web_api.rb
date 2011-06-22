@@ -9,5 +9,4 @@ module WebAPI
   class Error < ::StandardError; end
   class NotAvailableError < Error; end
   class NotAuthenticatedError < Error; end
-  class NotUpdatedError < Error; end
 end

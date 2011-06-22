@@ -172,14 +172,14 @@ module WebAPI
             if act
               @api.send('progressWorkflowAction', issue.key, act.id.to_s, [])
             else
-              raise NotUpdatedError, "there's no action to change status " \
-                                     "from #{old_stat} to #{new_stat}"
+              raise Error, "there's no action to change status " \
+                           "from #{old_stat} to #{new_stat}"
             end
           else
-            raise NotUpdatedError, "can't change status to #{new_stat}"
+            raise Error, "can't change status to #{new_stat}"
           end
         else
-          raise NotUpdatedError, "can't change status from #{old_stat}"
+          raise Error, "can't change status from #{old_stat}"
         end
       end
     end
