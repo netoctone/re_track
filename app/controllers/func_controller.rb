@@ -190,7 +190,8 @@ class FuncController < ApplicationController
     else
        bts = bts_class.new(:login => bts_account.login,
                            :password => bts_account.password,
-                           :url => bts_account.url)
+                           :url => bts_account.url,
+                           :proxy => bts_account.proxy)
        session[:bts_dump] = bts.dump
        bts
     end

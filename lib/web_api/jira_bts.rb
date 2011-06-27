@@ -79,10 +79,18 @@ module WebAPI
       @username = details_or_dump[:login]
       @password = details_or_dump[:password]
       @url = details_or_dump[:url]
+      @proxy = details_or_dump[:proxy]
 
       begin
         @api = Jira4R::JiraTool.new(2, @url)
         @api.driver.options[SSLVerifyModeProp] = OpenSSL::SSL::VERIFY_NONE
+        begin
+          @api.driver.httpproxy = @proxy if @proxy
+        rescue ArgumentError => e
+          ::Rails.logger.info "SOAP::RPC::Driver#httpproxy= raised error: " \
+                              "#{e.class}: #{e.message}"
+          raise NotAvailableError, "Proxy '#@proxy' is unavailable"
+        end
         @api.login(@username, @password)
       rescue SOAP::FaultError => e
         ::Rails.logger.info "Jira4R::JiraTool#login raised error: " \
@@ -118,6 +126,7 @@ module WebAPI
         :login => @username,
         :password => @password,
         :url => @url,
+        :proxy => @proxy,
         :field_convert => @field_convert
       }
     end

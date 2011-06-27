@@ -19,6 +19,9 @@ class BtsAccountsController < ApplicationController
         conf[:add] = [:url] if bts.url_settable?
         conf
       end
+    },
+    :proxy => {
+      :required => false
     }
   })
 end

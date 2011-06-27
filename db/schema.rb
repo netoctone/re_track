@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110612083020) do
+ActiveRecord::Schema.define(:version => 20110624123138) do
 
   create_table "account_groups", :force => true do |t|
     t.integer  "user_id"
@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(:version => 20110612083020) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "url"
+    t.string   "proxy"
   end
 
   create_table "defect_tracks", :force => true do |t|
