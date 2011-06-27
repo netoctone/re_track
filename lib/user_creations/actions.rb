@@ -43,6 +43,7 @@ module UserCreations
 
     # POST /(user_creations)/create.json
     def create
+      convert_empty_optional_to_nil(params)
       params[creation_name][:user_id] = current_user_id
       user_creation = creation_model.new(params[creation_name])
 
@@ -77,6 +78,7 @@ module UserCreations
 
     # PUT /(user_creations)/update.json
     def update
+      convert_empty_optional_to_nil(params)
       user_creation = creation_model.find(params[:id])
 
       #does it make any sense?
@@ -150,6 +152,14 @@ module UserCreations
       res = { :success => false }
       res[:errormsg] = errors[:base].join('<br/>') if errors[:base]
       res
+    end
+
+    def convert_empty_optional_to_nil params
+      self.class.optional_form_data.each do |name|
+        name_str = name.to_s
+        creation_params = params[creation_name]
+        creation_params[name_str] = nil if creation_params[name_str].empty?
+      end
     end
   end
 end

@@ -1,18 +1,99 @@
 Ext.ns('ReTrack');
 
+ReTrack.FormFieldEnable = Ext.extend(Ext.util.Observable, {
+  constructor: function(config) {
+    this.form = config.form;
+    ReTrack.FormFieldEnable.superclass.constructor.call(this, config);
+
+    this.fieldValToAdd = {};
+    this.currentAdd = {};
+    this.currentVal = {};
+  },
+
+  // fieldId is an itemId of form field
+  // valueToAdd must be like { value: [fieldId, ...], ... }
+  addFieldValToAdd: function(fieldId, valueToAdd) {
+    this.fieldValToAdd[fieldId] = valueToAdd;
+  },
+
+  updateForm: function(values) {
+    for(var fieldId in this.fieldValToAdd) {
+      var val = values[this.form.func.subject + '[' + fieldId + ']'];
+      if(val) {
+        if(!(this.currentVal[fieldId] === val)) {
+          this.updateField(fieldId, val, false);
+        }
+      }
+    }
+    this.form.doLayout();
+  },
+
+  updateField: function(fieldId, value) {
+    this.currentVal[fieldId] = value;
+
+    this.disableChildren(fieldId);
+    this.enableChildren(fieldId, value);
+
+    if(!(arguments[2] === false)) {
+      this.form.doLayout();
+    }
+  },
+
+  // private methods
+
+  disableField: function(fieldId) {
+    var field = this.form.getComponent(fieldId);
+    field.disable();
+    field.setVisible(false);
+    this.disableChildren(fieldId);
+  },
+
+  disableChildren: function(fieldId) {
+    var added = this.currentAdd[fieldId];
+    if(added) {
+      for(var i = 0; i != added.length; i++) {
+        this.disableField(added[i]);
+      }
+      delete this.currentAdd[fieldId];
+    }
+  },
+
+  enableField: function(fieldId) {
+    var field = this.form.getComponent(fieldId);
+    field.enable();
+    field.setVisible(true);
+    this.enableChildren(fieldId, field.getValue());
+  },
+
+  enableChildren: function(fieldId, value) {
+    var valueToAdd = this.fieldValToAdd[fieldId];
+    if(valueToAdd) {
+      var toAdd = valueToAdd[value];
+      if(toAdd) {
+        for(var i = 0; i != toAdd.length; i++) {
+          this.enableField(toAdd[i]);
+        }
+        this.currentAdd[fieldId] = toAdd;
+      }
+    }
+  }
+});
+
 ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
   initComponent: function() {
     var func = this.func = this.initialConfig.functional;
     func.controller = ReTrack.util.pluralize(func.subject);
-    var addComboList = this.addComboList = [];
+    var enabler = this.enabler = new ReTrack.FormFieldEnable({ form: this });
 
     var itemsConf = func.dataConfig;
 
     var comp = this;
     var items = [];
+    var disabledItems = {};
     for(var name in itemsConf) {
       var itemConf = itemsConf[name];
       var item = {};
+      item.itemId = name;
       if(itemConf.label) {
         item.fieldLabel = itemConf.label;
       } else {
@@ -33,66 +114,24 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
                                                            itemConf.options);
         Ext.apply(item, combo_and_help.combo);
         item = new Ext.form.ComboBox(item);
-        if(!ReTrack.util.isEmpty(combo_and_help.valueToAddConfMap)) {
-          var valueToAddConfMap = combo_and_help.valueToAddConfMap;
-          var valueToAdd = {};
-          for(var value in valueToAddConfMap) {
-            var addConf = valueToAddConfMap[value];
-            var add = {};
-
-            //maybe some kind of recursion
-            for(var name in addConf) {
-              var itConf = addConf[name];
-              var it = {
-                itemId: name
-              };
-              if(itConf.label) {
-                it.fieldLabel = itConf.label;
-              } else {
-                it.fieldLabel = name;
-              }
-              it.name = func.subject + '[' + name + ']';
-              it.allowBlank = false;
-              it.blankText = name + ' is required';
-              if(itConf.type == 'string') {
-                it.xtype = 'textfield';
-              }
-
-              add[name] = it;
-            }
-
-            valueToAdd[value] = add;
-          } // eo valueToAdd creation
-
-          //no cross-addition taken into account
-          item.updateAddition = function() {
-            var addedItemIds = [];
-            return function() {
-              var addedItemId = undefined;
-              while(addedItemId = addedItemIds.pop()) {
-                comp.getComponent(addedItemId).destroy();
-              }
-
-              var addItems = undefined;
-              if(addItems = valueToAdd[this.getValue()]) {
-                for(var name in addItems) {
-                  comp.add(addItems[name]);
-                  addedItemIds.push(name);
-                }
-                comp.doLayout(); //maybe use outside this block
-              }
-            };
-          }();
-
+        var valueToAdd = combo_and_help.valueToAddMap;
+        if(!ReTrack.util.isEmpty(valueToAdd)) {
+          enabler.addFieldValToAdd(item.itemId, valueToAdd);
           item.on('select', function(combo) {
-            combo.updateAddition();
+            enabler.updateField(combo.itemId, combo.getValue());
           });
 
-          addComboList.push(item);
+          for(var val in valueToAdd) {
+            var add = valueToAdd[val];
+            for(var i = 0; i != add.length; i++) {
+              disabledItems[add[i]] = true;
+            }
+          }
         }
       } // eo 'combo' case
       items.push(item);
     }
+
     var config = {
       items: items
     };
@@ -100,6 +139,12 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
     Ext.apply(this, Ext.apply(this.initialConfig, config));
 
     ReTrack.FunctionalForm.superclass.initComponent.apply(this, arguments);
+
+    for(var itemId in disabledItems) { // can't set ComboBox by config properly
+      var field = this.getComponent(itemId);
+      field.disable();
+      field.setVisible(false);
+    }
   }, // eo function initComponent
 
   constructor: function(config) {
@@ -122,12 +167,12 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
       waitMsg = conf.waitMsg;
     }
 
-    this.getForm().submit({
+    comp.getForm().submit({
       waitMsg: waitMsg,
-      url: this.func.controller + '/update.json',
+      url: comp.func.controller + '/update.json',
       method: 'put',
       success: function(form, action) {
-        var values = action.result.subject;
+        var values = action.result[comp.func.subject];
         comp.updateSubject(values);
         callback.success();
       },
@@ -163,6 +208,7 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
       method: 'post',
       success: function(form, action) {
         form.reset();
+        comp.enabler.updateForm(form.getValues());
         callback.success(action.result.id);
       },
       failure: function(form, action) {
@@ -209,16 +255,14 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
     this.oldValues = values;
     this.getForm().setValues(values);
 
-    var addComboList = this.addComboList;
-    for(var i = 0; i != addComboList.length; i++) {
-      addComboList[i].updateAddition();
-    }
-    this.getForm().setValues(values); //think
+    this.enabler.updateForm(values);
   },
 
   //private method
   rollbackSubject: function() {
     //maybe load data from server
     this.getForm().setValues(this.oldValues);
+
+    this.enabler.updateForm(this.oldValues);
   }
 });

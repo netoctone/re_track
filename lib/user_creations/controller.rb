@@ -16,7 +16,7 @@ module UserCreations
 
       class << incl
         attr_reader :user_creation_model, :user_creation_name,
-                    :form_data_config
+                    :form_data_config, :optional_form_data
 
         def configure_form_data config
           (user_creation_model.column_names -
@@ -32,6 +32,7 @@ module UserCreations
             end
           end
 
+          @optional_form_data = []
           config.each do |key, value|
             key_str = key.to_s
             if value.equal?(true)
@@ -47,10 +48,12 @@ module UserCreations
             if value[:type].equal?(:combo)
               add = []
               value[:options].each do |opt|
-                add |= opt[:add].keys if opt[:add]
+                add |= opt[:add] if opt[:add]
               end
               value[:add] = add unless add.empty?
             end
+
+            @optional_form_data << key if value[:required].equal?(false)
           end
 
           @form_data_config = config

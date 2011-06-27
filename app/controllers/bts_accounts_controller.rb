@@ -16,10 +16,9 @@ class BtsAccountsController < ApplicationController
       :type => :combo,
       :options => WebAPI::Bts.list.map do |bts|
         conf = { :display => bts.name, :value => bts.name }
-        conf[:add] = { :url => { :type => :string } } if bts.url_settable?
+        conf[:add] = [:url] if bts.url_settable?
         conf
       end
-    },
-    :url => false
+    }
   })
 end

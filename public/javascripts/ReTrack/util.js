@@ -48,7 +48,7 @@ ReTrack.util = {
       renderer: function(val) {
         return comboMap[val];
       },
-      valueToAddConfMap: comboAddMap,
+      valueToAddMap: comboAddMap,
       combo: {
         editable: false,
         mode: 'local',
