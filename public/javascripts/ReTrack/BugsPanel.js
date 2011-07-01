@@ -22,7 +22,13 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
       title: 'Bugs',
       layout: 'fit',
       tbar: [
-        accCombo
+        accCombo,
+        {
+          text: 'Refresh',
+          handler: function() {
+            accCombo.selectById(accCombo.getValue());
+          }
+        }
       ]
     };
 
