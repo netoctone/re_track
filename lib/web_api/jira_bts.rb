@@ -34,6 +34,10 @@ module WebAPI
         #or hash of lambdas-converters
         :map => [
           {
+            :display => 'New 0%',
+            :bts_value => 'New'
+          },
+          {
             :display => 'Assigned 20%',
             # must be unique
             :track_value => DefectTrack::PercentToStatus[20].to_s,
@@ -147,6 +151,9 @@ module WebAPI
 
     Fields = [:description] # only those, which don't require convert_field_to_
     StateDyadToAction = {
+      'New' => {
+        'Assigned' => 'Allocate'
+      },
       'Assigned' => {
         'Working on it' => 'Start work',
         'Resolved' => 'Resolve'
@@ -155,6 +162,7 @@ module WebAPI
         'Assigned' => 'Pause work',
         'Resolved' => 'Resolve'
       }
+      #'New' => ... => ['Allocate', 'Resolve']
       #'Resolved' => ... => ['Verify', 'Reopen', 'Unresolve']
     }
 
