@@ -95,21 +95,26 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
   },
 
   buildGrid: function(config) {//builds and returns new grid
+    var comp = this;
     var cols_and_fields = ReTrack.util.buildColsAndFieldsConfig(config);
     var cols = cols_and_fields.cols;
     var fields = cols_and_fields.fields;
     return new Ext.grid.EditorGridPanel({
       itemId: 'defectGrid',
       border: false,
-      ds: new Ext.data.JsonStore({//handle errors (bts not available ...)
-        proxy: new Ext.data.HttpProxy({
-          url: 'func/defect_show_all.json',
-          timeout: 10*60*1000
-        }),
-        root: 'defects',
-        fields: fields,
-        autoLoad: true
-      }),
+      ds: function() {
+        var ds = new Ext.data.JsonStore({//handle errors (bts not available ...)
+          proxy: new Ext.data.HttpProxy({
+            url: 'func/defect_show_all.json',
+            timeout: 10*60*1000
+          }),
+          root: 'defects',
+          fields: fields,
+          autoLoad: true
+        });
+        new Ext.LoadMask(comp.getId(), { msg: 'Loading bugs...', store: ds });
+        return ds;
+      }(),
       cm: new Ext.grid.ColumnModel({
         defaultSortable: false,
         columns: cols
