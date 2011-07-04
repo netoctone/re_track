@@ -38,6 +38,10 @@ module WebAPI
             :bts_value => 'New'
           },
           {
+            :display => 'Reopened 0%',
+            :bts_value => 'Reopened'
+          },
+          {
             :display => 'Assigned 20%',
             # must be unique
             :track_value => DefectTrack::PercentToStatus[20].to_s,
@@ -152,6 +156,9 @@ module WebAPI
     Fields = [:description] # only those, which don't require convert_field_to_
     StateDyadToAction = {
       'New' => {
+        'Assigned' => 'Allocate'
+      },
+      'Reopened' => {
         'Assigned' => 'Allocate'
       },
       'Assigned' => {
