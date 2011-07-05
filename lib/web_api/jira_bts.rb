@@ -22,7 +22,8 @@ module WebAPI
         :editable => false
       },
       :description => {
-        :type => :text
+        :type => :text,
+        :editable => false
       },
       :type => {
         :type => :string,
