@@ -1,13 +1,5 @@
 require 'google_spreadsheet'
 
-class Object
-  def send_chain methods
-    methods.inject(self) do |obj, meth|
-      obj.send meth
-    end
-  end
-end
-
 module WebAPI
 
   class GoogleSpreadsheets < ReportService
