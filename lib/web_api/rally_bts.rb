@@ -6,21 +6,21 @@ module WebAPI
         # one of confs must :track_to => :formatted_id
         # :track => true, # if false but :track_to or :map setted, then ignored
         :track_to => :formatted_id,
-        :header_name => 'ID',
+        :label => 'ID',
         :type => :string,
-        :editable => false
+        :read_only => true
       },
       :name => {
         :track_to => :description,
         :type => :string,
-        :editable => false
+        :disabled => true
       },
       :description => {
         :type => :text
       },
       :state => {
         :type => :string,
-        :editable => false
+        :disabled => true
       },
       :schedule_state => {
         :type => :combo,
@@ -57,7 +57,7 @@ module WebAPI
       },
       :submitted_by => {
         :type => :string,
-        :editable => false
+        :disabled => true
       }
     })
 

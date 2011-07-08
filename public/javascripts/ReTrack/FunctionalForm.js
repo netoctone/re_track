@@ -100,6 +100,12 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
         item.fieldLabel = name;
       }
       item.name = func.subject + '[' + name + ']';
+      if(itemConf.disabled === true) {
+        item.disabled = true;
+      }
+      if(itemConf.read_only === true) {
+        item.readOnly = true;
+      }
       if(!(itemConf.required === false)) {
         item.allowBlank = false;
         item.blankText = name + ' is required';
@@ -109,7 +115,11 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
         if(name == 'password') {
           item.inputType = 'password';
         }
+      } else if(itemConf.type == 'text') {
+        item.xtype = 'textarea';
       } else if(itemConf.type == 'combo') {
+        item.hiddenName = item.name;
+        delete item.name;
         var combo_and_help = ReTrack.util.buildComboConfig(name,
                                                            itemConf.options);
         Ext.apply(item, combo_and_help.combo);
@@ -129,6 +139,13 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
           }
         }
       } // eo 'combo' case
+
+      Ext.applyIf(item, itemConf.form_style);
+      Ext.applyIf(item, itemConf.style);
+      if(itemConf.type == 'text') {
+        item.width = item.width || 200;
+      }
+
       items.push(item);
     }
 
@@ -256,6 +273,14 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
     this.getForm().setValues(values);
 
     this.enabler.updateForm(values);
+  },
+
+  getSubject: function() {
+    var values = {};
+    this.items.each(function(f) {
+      values[f.getItemId()] = f.getValue();
+    });
+    return values;
   },
 
   //private method

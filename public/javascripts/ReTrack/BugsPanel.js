@@ -81,7 +81,7 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
   loadGrid: function(bts) {
     var comp = this;
     Ext.Ajax.request({
-      url: 'func/defect_grid_config.json' +
+      url: 'defects/grid_config.json' +
            Ext.urlEncode({ bts: bts }, '?'),
       method: 'get',
       success: function(resp) {
@@ -105,13 +105,57 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
     var cols_and_fields = ReTrack.util.buildColsAndFieldsConfig(config);
     var cols = cols_and_fields.cols;
     var fields = cols_and_fields.fields;
-    return new Ext.grid.EditorGridPanel({
+    var sendFields = cols_and_fields.sendFields;
+    var grid = new Ext.grid.EditorGridPanel({
       itemId: 'defectGrid',
       border: false,
+      tbar: [
+        {
+          text: 'Details',
+          handler: function() {
+            var cell = grid.getSelectionModel().getSelectedCell();
+            if(cell) {
+              var form = new ReTrack.FunctionalForm({
+                functional: {
+                  subject: 'defect',
+                  dataConfig: config
+                },
+                border: false
+              });
+              var record = grid.getStore().getAt(cell[0]);
+              form.updateSubject(record.data);
+              new Ext.Window({
+                title: 'Bug details',
+                resizable: false,
+                padding: 10,
+                buttons: [
+                  {
+                    text: 'Update',
+                    handler: function() {
+                      form.submitUpdate({
+                        success: function() {
+                          Ext.apply(record.data, form.getSubject());
+                          record.commit();
+                        },
+                        failure: function(errormsg) {
+                          Ext.Msg.alert('Error', errormsg);
+                        }
+                      });
+                    }
+                  }
+                ],
+                items: [
+                  form
+                ]
+              }).show();
+            }
+          }
+        }
+      ],
       ds: function() {
         var ds = new Ext.data.JsonStore({//handle errors (bts not available ...)
           proxy: new Ext.data.HttpProxy({
-            url: 'func/defect_show_all.json',
+            url: 'defects/show_all.json',
             timeout: 10*60*1000
           }),
           root: 'defects',
@@ -122,18 +166,18 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
         return ds;
       }(),
       cm: new Ext.grid.ColumnModel({
-        defaultSortable: false,
+        defaultSortable: true,
         columns: cols
       }),
       clicksToEdit: 1,
       listeners: {
         afteredit: function(editEvent) {
           Ext.Ajax.request({
-            url: 'func/defect_update.json',
+            url: 'defects/update.json',
             params: function() {
               res = {};
               var data = editEvent.record.data;
-              for(var field in data) {
+              for(var field in sendFields) {
                 res['defect[' + field + ']'] = data[field];
               }
               return res;
@@ -160,5 +204,6 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
         }
       }
     });
+    return grid;
   }
 });

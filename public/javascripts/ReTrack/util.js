@@ -68,16 +68,20 @@ ReTrack.util = {
   buildColsAndFieldsConfig: function(config) {
     var cols = [];
     var fields = [];
+    var sendFields = {};
     for(var name in config) {
       var colConf = config[name];
       var col = {};
-      if(colConf.header_name) {
-        col.header = colConf.header_name;
+      if(colConf.label) {
+        col.header = colConf.label;
       } else {
         col.header = name;
       }
       col.dataIndex = name;
-      if(!(colConf.editable === false)) {
+      if(!(colConf.disabled === true)) {
+        sendFields[name] = true;
+      }
+      if(!(colConf.disabled === true || colConf.read_only === true)) {
         if(colConf.type == 'string' || colConf.type == 'text') {
           col.editor = { xtype: 'textfield' };
         } else if(colConf.type == 'combo') {
@@ -87,15 +91,18 @@ ReTrack.util = {
           col.renderer = combo_and_rend.renderer;
         }
       }
+      Ext.applyIf(col, colConf.grid_style);
+      Ext.applyIf(col, colConf.style);
 
       cols.push(col);
       fields.push(name);
     }
     return {
       cols: cols,
-      fields: fields
+      fields: fields,
+      sendFields: sendFields
     };
-  } // eo function buildGridColModelConfig
+  } // eo function buildColsAndFieldsConfig
 }
 
 //ReTrack.util.recordToFormValues = function(name, obj) {

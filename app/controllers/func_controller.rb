@@ -41,84 +41,6 @@ class FuncController < ApplicationController
     end
   end
 
-  # GET /func/defect_grid_config.json
-  def defect_grid_config
-    session[:bts] = nil
-    respond_to do |format|
-      format.json do
-        begin
-          render json: {
-            success: true,
-            config: params[:bts].constantize.grid_config
-          }
-        rescue NameError
-          render json: {
-            success: false,
-            errormsg: 'BTS \'' + params[:bts] + '\' not supported'
-          }
-        end
-      end
-    end
-  end
-
-  # GET /func/defect_show_all.json
-  def defect_show_all
-    bts_account = BtsAccount.find_current(current_user_id) # transitive enough
-
-    respond_to do |format|
-      format.json do
-        begin
-          defects = build_bts(bts_account).find_defects
-          render json: {
-            success: true,
-            defects: defects
-          }
-        rescue WebAPI::Error => e
-          render json: {
-            success: false,
-            errormsg: e.message
-          }
-        end
-      end
-    end
-  end
-
-  # PUT /func/defect_update.json
-  def defect_update
-    bts_account = BtsAccount.find_current(current_user_id) # transitive enough
-
-    respond_to do |format|
-      format.json do
-        begin
-          # must raise if update fails
-          build_bts(bts_account).update_defect(params[:defect])
-
-          bts_class = bts_account.bts.constantize
-          track_data = bts_class.params_to_track_data(params[:defect])
-          track_data[:bts_account_id] = bts_account.id
-
-          begin
-            DefectTrack.track(track_data)
-            render json: {
-              success: true
-            }
-          rescue StandardError => e
-            render json: {
-              success: false,
-              bts_update_success: true,
-              errormsg: 'Failed to track your change (for reporting)'
-            }
-          end
-        rescue StandardError => e
-          render json: {
-            success: false,
-            errormsg: e.message
-          }
-        end
-      end
-    end
-  end
-
   # GET /func/track_show_report_by_date.json
   def track_show_report_by_date
     respond_to do |format|
@@ -182,20 +104,6 @@ class FuncController < ApplicationController
   end
 
   private
-
-  def build_bts bts_account
-    bts_class = bts_account.bts.constantize
-    if bts_dump = session[:bts_dump]
-       bts_class.new(bts_dump)
-    else
-       bts = bts_class.new(:login => bts_account.login,
-                           :password => bts_account.password,
-                           :url => bts_account.url,
-                           :proxy => bts_account.proxy)
-       session[:bts_dump] = bts.dump
-       bts
-    end
-  end
 
   def build_tracks from_time, to_time
     if acc_group = AccountGroup.find_current(current_user_id)

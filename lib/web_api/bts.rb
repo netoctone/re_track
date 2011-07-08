@@ -47,7 +47,8 @@ module WebAPI
         result
       end
 
-      GridConfigKeys = [:header_name, :type, :editable]
+      GridConfigKeys = [ :label, :type, :disabled, :read_only,
+                         :style, :grid_style, :form_style ]
 
       private
       def grid_config_elem config

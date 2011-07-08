@@ -8,26 +8,33 @@ module WebAPI
         # one of confs must :track_to => :formatted_id
         # :track => true, # if false but :track_to or :map setted, then ignored
         :track_to => :formatted_id,
-        #:header_name => 'Key',
+        #:label => 'Key',
         :type => :string,
-        :editable => false
+        :read_only => true
       },
       :priority => {
         :type => :string,
-        :editable => false
+        :disabled => true
       },
       :summary => {
         :track_to => :description,
         :type => :string,
-        :editable => false
+        :disabled => true,
+        :style => {
+          :width => 700
+        }
       },
       :description => {
         :type => :text,
-        :editable => false
+        :disabled => true,
+        :form_style => {
+          :width => 700,
+          :height => 170
+        }
       },
       :type => {
         :type => :string,
-        :editable => false
+        :disabled => true
       },
       :status => {
         :type => :combo,
@@ -72,7 +79,7 @@ module WebAPI
       },
       :reporter => {
         :type => :string,
-        :editable => false
+        :disabled => true
       }
     })
 
@@ -154,7 +161,7 @@ module WebAPI
       end
     end
 
-    Fields = [:description] # only those, which don't require convert_field_to_
+    Fields = [] # only those, which don't require convert_field_to_
     StateDyadToAction = {
       'New' => {
         'Assigned' => 'Allocate'
