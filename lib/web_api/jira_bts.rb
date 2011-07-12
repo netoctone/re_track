@@ -80,6 +80,13 @@ module WebAPI
       :reporter => {
         :type => :string,
         :disabled => true
+      },
+      :updated => {
+        :type => :string,
+        :disabled => true,
+        :style => {
+          :width => 170
+        }
       }
     })
 
