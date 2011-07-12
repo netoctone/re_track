@@ -106,6 +106,8 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
     var cols = cols_and_fields.cols;
     var fields = cols_and_fields.fields;
     var sendFields = cols_and_fields.sendFields;
+    var filters = cols_and_fields.filters;
+
     var grid = new Ext.grid.EditorGridPanel({
       itemId: 'defectGrid',
       border: false,
@@ -168,6 +170,10 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
       cm: new Ext.grid.ColumnModel({
         defaultSortable: true,
         columns: cols
+      }),
+      plugins: new Ext.ux.grid.GridFilters({
+        local: true,
+        filters: filters
       }),
       clicksToEdit: 1,
       listeners: {

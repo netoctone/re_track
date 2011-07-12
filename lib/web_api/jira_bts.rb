@@ -112,8 +112,9 @@ module WebAPI
         ::Rails.logger.info "Jira4R::JiraTool#login raised error: " \
                             "#{e.class}: #{e.message}"
         raise NotAuthenticatedError, 'Invalid username or password'
-      rescue ::SocketError, ::OpenSSL::SSL::SSLError,
-             Errno::ECONNREFUSED, SOAP::HTTPStreamError => e
+      rescue ::SocketError, HTTPClient::BadResponseError,
+             OpenSSL::SSL::SSLError, Errno::ECONNREFUSED,
+             SOAP::HTTPStreamError => e
         ::Rails.logger.info "Jira4R::JiraTool::new raised error: " \
                             "#{e.class}: #{e.message}"
         raise NotAvailableError, "Jira service '#@url' is unavailable"

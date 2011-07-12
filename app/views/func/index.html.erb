@@ -1,3 +1,5 @@
+<% gridfilters_path = '../ext-3.3.1/examples/ux/gridfilters' %>
+<%= stylesheet_link_tag "#{gridfilters_path}/css/GridFilters" %>
 <%= javascript_include_tag 'ReTrack/init',
                            'ReTrack/util',
                            'ReTrack/ReShowTabPanel',
@@ -13,5 +15,10 @@
                            'ReTrack/setup/GroupsPanel',
                            'ReTrack/setup/ReportAccountsPanel',
                            'ReTrack/WorkPanel',
+                           "#{gridfilters_path}/menu/ListMenu",
+                           "#{gridfilters_path}/GridFilters",
+                           "#{gridfilters_path}/filter/Filter",
+                           "#{gridfilters_path}/filter/ListFilter",
+                           "#{gridfilters_path}/filter/StringFilter",
                            'ReTrack/BugsPanel',
                            'ReTrack/ReportsPanel' %>

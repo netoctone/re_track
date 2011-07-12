@@ -69,6 +69,7 @@ ReTrack.util = {
     var cols = [];
     var fields = [];
     var sendFields = {};
+    var filters = [];
     for(var name in config) {
       var colConf = config[name];
       var col = {};
@@ -85,14 +86,34 @@ ReTrack.util = {
         if(colConf.type == 'string' || colConf.type == 'text') {
           col.editor = { xtype: 'textfield' };
         } else if(colConf.type == 'combo') {
-          combo_and_rend = ReTrack.util.buildComboConfig(name,
-                                                             colConf.options);
-          col.editor = Ext.apply(combo_and_rend.combo, { xtype: 'combo' });
-          col.renderer = combo_and_rend.renderer;
+          var comboAndRend = ReTrack.util.buildComboConfig(name,
+                                                           colConf.options);
+          col.editor = Ext.apply(comboAndRend.combo, { xtype: 'combo' });
+          col.renderer = comboAndRend.renderer;
         }
       }
       Ext.applyIf(col, colConf.grid_style);
       Ext.applyIf(col, colConf.style);
+
+      if(colConf.type == 'string') {
+        filters.push({
+          type: 'string',
+          dataIndex: name
+        });
+      }
+      if(colConf.type == 'combo') {
+        filters.push({
+          type: 'list',
+          dataIndex: name,
+          options: function() {
+            var res = [];
+            Ext.each(colConf.options, function(opt) {
+              res.push([opt.value, opt.display]);
+            });
+            return res;
+          }()
+        });
+      }
 
       cols.push(col);
       fields.push(name);
@@ -100,7 +121,8 @@ ReTrack.util = {
     return {
       cols: cols,
       fields: fields,
-      sendFields: sendFields
+      sendFields: sendFields,
+      filters: filters
     };
   } // eo function buildColsAndFieldsConfig
 }
