@@ -117,6 +117,8 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
         }
       } else if(itemConf.type == 'text') {
         item.xtype = 'textarea';
+      } else if(itemConf.type == 'date') {
+        item.xtype = 'datefield';
       } else if(itemConf.type == 'combo') {
         item.hiddenName = item.name;
         delete item.name;

@@ -95,9 +95,9 @@ ReTrack.util = {
       Ext.applyIf(col, colConf.grid_style);
       Ext.applyIf(col, colConf.style);
 
-      if(colConf.type == 'string') {
+      if(colConf.type == 'string' || colConf.type == 'date') {
         filters.push({
-          type: 'string',
+          type: colConf.type,
           dataIndex: name
         });
       }
@@ -116,7 +116,15 @@ ReTrack.util = {
       }
 
       cols.push(col);
-      fields.push(name);
+
+      if(colConf.type == 'date') {
+        fields.push({
+          name: name,
+          type: 'date'
+        });
+      } else {
+        fields.push(name);
+      }
     }
     return {
       cols: cols,

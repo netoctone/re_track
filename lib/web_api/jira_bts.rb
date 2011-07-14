@@ -82,10 +82,10 @@ module WebAPI
         :disabled => true
       },
       :updated => {
-        :type => :string,
+        :type => :date,
         :disabled => true,
         :style => {
-          :width => 170
+          :width => 240
         }
       }
     })
@@ -158,8 +158,8 @@ module WebAPI
     Limit = 1000
 
     def find_defects
-      @api.send('getIssuesFromJqlSearch', "assignee = '#{@username}'", Limit)
-      .map do |issue|
+      @api.send('getIssuesFromJqlSearch',
+                "assignee = '#{@username}'", Limit).map do |issue|
         row = {}
         JiraBts.each_field_name do |name|
           value = convert_field_to_name(name, issue.send(name))
