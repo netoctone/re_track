@@ -92,10 +92,17 @@ module WebAPI
 
     SSLVerifyModeProp = 'protocol.http.ssl_config.verify_mode'
 
-    FieldNameToGetter = {
+    FIELD_NAME_TO_HASH_GETTER = {
       :status => 'getStatuses',
       :type => 'getIssueTypes',
       :priority => 'getPriorities'
+    }
+
+    FIELD_NAME_TO_SINGLE_GETTER = {
+      :reporter => {
+        :api_getter => 'getUser',
+        :val_getter => :fullname
+      }
     }
 
     def initialize details_or_dump={}
@@ -131,7 +138,7 @@ module WebAPI
         @field_convert = field_convert
       else
         @field_convert = {}
-        FieldNameToGetter.each do |key, val|
+        FIELD_NAME_TO_HASH_GETTER.each do |key, val|
           convert = {
             :to_name => {},
             :to_id => {}
@@ -141,6 +148,11 @@ module WebAPI
             convert[:to_id][field.name] = field.id
           end
           @field_convert[key] = convert
+        end
+        FIELD_NAME_TO_SINGLE_GETTER.each do |key,|
+          @field_convert[key] = {
+            :to_name => {}
+          }
         end
       end
     end
@@ -226,16 +238,29 @@ module WebAPI
 
     private
     def convert_field_to_name name, value
-      if FieldNameToGetter.has_key? name
+      if FIELD_NAME_TO_HASH_GETTER.has_key? name
         @field_convert[name][:to_name][value]
+      elsif config = FIELD_NAME_TO_SINGLE_GETTER[name]
+        convert_to_name = @field_convert[name][:to_name]
+        if res = convert_to_name[value]
+          res
+        else
+          if entity = @api.send(config[:api_getter], value)
+            convert_to_name[value] = entity.send(config[:val_getter])
+          else
+            nil
+          end
+        end
       else
         value
       end
     end
 
     def convert_field_to_id name, value
-      if FieldNameToGetter.has_key? name
+      if FIELD_NAME_TO_HASH_GETTER.has_key? name
         @field_convert[name][:to_id][value]
+      elsif FIELD_NAME_TO_SINGLE_GETTER.has_key? name
+        nil
       else
         value
       end
