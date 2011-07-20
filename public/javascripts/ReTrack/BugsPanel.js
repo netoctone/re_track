@@ -117,39 +117,7 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
           handler: function() {
             var cell = grid.getSelectionModel().getSelectedCell();
             if(cell) {
-              var form = new ReTrack.FunctionalForm({
-                functional: {
-                  subject: 'defect',
-                  dataConfig: config
-                },
-                border: false
-              });
-              var record = grid.getStore().getAt(cell[0]);
-              form.updateSubject(record.data);
-              new Ext.Window({
-                title: 'Bug details',
-                resizable: false,
-                padding: 10,
-                buttons: [
-                  {
-                    text: 'Update',
-                    handler: function() {
-                      form.submitUpdate({
-                        success: function() {
-                          Ext.apply(record.data, form.getSubject());
-                          record.commit();
-                        },
-                        failure: function(errormsg) {
-                          Ext.Msg.alert('Error', errormsg);
-                        }
-                      });
-                    }
-                  }
-                ],
-                items: [
-                  form
-                ]
-              }).show();
+              grid.showBugDetails(cell[0]);
             }
           }
         }
@@ -177,6 +145,9 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
       }),
       clicksToEdit: 1,
       listeners: {
+        celldblclick: function(grid, row) {
+          grid.showBugDetails(row);
+        },
         afteredit: function(editEvent) {
           Ext.Ajax.request({
             url: 'defects/update.json',
@@ -210,6 +181,41 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
         }
       }
     });
+    grid.showBugDetails = function(row) {
+      var form = new ReTrack.FunctionalForm({
+        functional: {
+          subject: 'defect',
+          dataConfig: config
+        },
+        border: false
+      });
+      var record = this.getStore().getAt(row);
+      form.updateSubject(record.data);
+      new Ext.Window({
+        title: 'Bug details',
+        resizable: false,
+        padding: 10,
+        buttons: [
+          {
+            text: 'Update',
+            handler: function() {
+              form.submitUpdate({
+                success: function() {
+                  Ext.apply(record.data, form.getSubject());
+                  record.commit();
+                },
+                failure: function(errormsg) {
+                  Ext.Msg.alert('Error', errormsg);
+                }
+              });
+            }
+          }
+        ],
+        items: [
+          form
+        ]
+      }).show();
+    }
     return grid;
   }
 });
