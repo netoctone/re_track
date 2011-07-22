@@ -33,7 +33,7 @@ ReTrack.util = {
     return result;
   }, // eo function buildCallback
 
-  buildSharedComboConfig: function(name, opts) {
+  buildSharedComboConf: function(name, opts) {
     return {
       xtype: 'combo',
       mode: 'local',
