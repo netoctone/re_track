@@ -20,7 +20,11 @@ class BtsAccountsController < ApplicationController
         conf
       end
     },
+    :url => {
+      :shared => true,
+    },
     :proxy => {
+      :shared => true,
       :required => false
     }
   })

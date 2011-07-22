@@ -53,6 +53,13 @@ module UserCreations
               value[:add] = add unless add.empty?
             end
 
+            if value[:type].equal?(:string) && value[:shared].equal?(true)
+              opts = user_creation_model.select("distinct #{key}").map { |rec|
+                rec[key]
+              }.compact
+              value[:options] = opts
+            end
+
             @optional_form_data << key if value[:required].equal?(false)
           end
 

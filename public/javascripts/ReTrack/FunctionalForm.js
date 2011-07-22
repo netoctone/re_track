@@ -111,9 +111,14 @@ ReTrack.FunctionalForm = Ext.extend(Ext.form.FormPanel, {
         item.blankText = name + ' is required';
       }
       if(itemConf.type == 'string') {
-        item.xtype = 'textfield';
-        if(name == 'password') {
-          item.inputType = 'password';
+        if(itemConf.shared === true) {
+          Ext.apply(item, ReTrack.util.buildSharedComboConf(name,
+                                                            itemConf.options));
+        } else {
+          item.xtype = 'textfield';
+          if(name == 'password') {
+            item.inputType = 'password';
+          }
         }
       } else if(itemConf.type == 'text') {
         item.xtype = 'textarea';
