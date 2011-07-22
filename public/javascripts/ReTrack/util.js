@@ -34,13 +34,17 @@ ReTrack.util = {
   }, // eo function buildCallback
 
   buildSharedComboConf: function(name, opts) {
+    var comboData = [];
+    for(var i = 0; i < opts.length; i++) {
+      comboData.push([opts[i]]);
+    }
     return {
       xtype: 'combo',
       mode: 'local',
       store: {
         xtype: 'arraystore',
         fields: ['display'],
-        data: opts
+        data: comboData
       },
       displayField: 'display',
       triggerAction: 'all',
