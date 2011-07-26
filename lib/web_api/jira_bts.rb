@@ -169,16 +169,13 @@ module WebAPI
 
     Limit = 1000
 
-    def find_defects
-      @api.send('getIssuesFromJqlSearch',
-                "assignee = '#{@username}'", Limit).map do |issue|
-        row = {}
-        JiraBts.each_field_name do |name|
-          value = convert_field_to_name(name, issue.send(name))
-          row[name] = JiraBts.convert_value_to_track(name, value)
-        end
-        row
-      end
+    def fetch_defect_list
+      @api.send('getIssuesFromJqlSearch', "assignee = '#{@username}'", Limit)
+    end
+
+    def extract_defect_value name, defect
+      val = defect.send(name)
+      convert_field_to_name(name, val)
     end
 
     Fields = [] # only those, which don't require convert_field_to_
@@ -201,18 +198,17 @@ module WebAPI
       #'Resolved' => ... => ['Verify', 'Reopen', 'Unresolve']
     }
 
-    def update_defect params
-      issue = @api.send('getIssue', params[:key])
+    def update_defect fields
+      issue = @api.send('getIssue', fields[:key])
 
       Fields.each do |name|
-        val = JiraBts.convert_value_to_bts(name, params[name])
-        if val != issue.send(name)
-          field = Jira4R::V2::RemoteFieldValue.new(name, val)
+        if fields[name] != issue.send(name)
+          field = Jira4R::V2::RemoteFieldValue.new(name, fields[name])
           @api.send('updateIssue', issue.key, field)
         end
       end
 
-      new_stat = JiraBts.convert_value_to_bts(:status, params[:status])
+      new_stat = fields[:status]
       old_stat = convert_field_to_name(:status, issue.status)
       if new_stat != old_stat
         #::Rails.logger.info @api.send('getAvailableActions', issue.key)
@@ -265,7 +261,6 @@ module WebAPI
         value
       end
     end
-
   end
 
 end

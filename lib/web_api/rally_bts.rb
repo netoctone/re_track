@@ -75,36 +75,17 @@ module WebAPI
       raise NotAuthenticatedError, e.message
     end
 
-    def find_defects quant=2
-      quant = 100 if quant > 100
-      @start_index += quant
+    def find_defects
       username = @username # silly unnecessary metaprogramming is THE EVIL
-      @rally_api.find(:defect,
-                      :pagesize => quant,
-                      :start => @start_index-quant) { equal :owner, username }
-      .collect do |query_result|
-        row = {}
-        RallyBts.each_field_name do |name|
-          row[name] = RallyBts.convert_value_to_track(name,
-                                                      query_result.send(name))
-        end
-        row
-      end
+      @rally_api.find(:defect) { equal :owner, username }
     end
 
-    # TODO: ensure exception raise when update fails or return nil (and change FuncController#defect_update)
-    def update_defect params
+    # TODO: ensure exception raise when update fails or return nil
+    def update_defect fields
       defect = @rally_api.find(:defect) { equal :formatted_i_d,
-                                                params[:formatted_i_d] }.first
-      update_params = {}
-      RallyBts.each_field_name do |name|
-        val = RallyBts.convert_value_to_bts(name, params[name])
-        if val != defect.send(name)
-          update_params[name] = val
-        end
-      end
-
-      defect.update(update_params)
+                                                fields[:formatted_i_d] }.first
+      fields.delete_if { |name, val| val == defect.send(name) }
+      defect.update(fields)
     end
   end
 

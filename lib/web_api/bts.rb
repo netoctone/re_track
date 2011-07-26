@@ -3,43 +3,23 @@ module WebAPI
   class Bts < Service
     class << self
       def grid_config
-        @grid_config
+        @@grid_config
       end
 
       def configure_flow config
-        @grid_config = {}
-        @track_config = {}
+        @@grid_config = {}
+        @@track_config = {}
         config.each do |name, config|
-          @grid_config[name] = grid_config_elem(config)
-          if elem = track_config_elem(name, config)
-            @track_config[name] = elem
+          @@grid_config[name] = build_grid_config_elem(config)
+          if elem = build_track_config_elem(name, config)
+            @@track_config[name] = elem
           end
-        end
-      end
-
-      def each_field_name
-        @grid_config.each { |key, val| yield key }
-      end
-
-      def convert_value_to_track name, val
-        if @track_config[name] && convert = @track_config[name][:bts_to_track]
-          convert[val]
-        else
-          val
-        end
-      end
-
-      def convert_value_to_bts name, val
-        if @track_config[name] && convert = @track_config[name][:bts_of_track]
-          convert[val]
-        else
-          val
         end
       end
 
       def params_to_track_data params
         result = {}
-        @track_config.each do |name, config|
+        @@track_config.each do |name, config|
           if value = params[name]
             result[config[:to]] = value
           end
@@ -51,7 +31,8 @@ module WebAPI
                          :style, :grid_style, :form_style ]
 
       private
-      def grid_config_elem config
+
+      def build_grid_config_elem config
         res = config.select { |key, val| GridConfigKeys.member? key }
         if config[:type] == :combo # && config[:map]
           res[:options] = config[:map].collect do |elem|
@@ -63,7 +44,7 @@ module WebAPI
         res
       end
 
-      def track_config_elem name, config
+      def build_track_config_elem name, config
         result = nil
         if config[:track]
           result = { :to => name }
@@ -94,6 +75,48 @@ module WebAPI
           end
         end
         result
+      end
+    end
+
+    def find_all
+      fetch_defect_list.map do |defect|
+        row = {}
+        @@grid_config.each_key do |name|
+          val = extract_defect_value(name, defect)
+          row[name] = convert_value_to_track(name, val)
+        end
+        row
+      end
+    end
+
+    def update params
+      fields = {}
+      @@grid_config.each_key do |name|
+        fields[name] = convert_value_to_bts(name, params[name])
+      end
+      update_defect fields
+    end
+
+
+    def extract_defect_value name, defect
+      defect.send name
+    end
+
+    private
+
+    def convert_value_to_track name, val
+      if @@track_config[name] && convert = @@track_config[name][:bts_to_track]
+        convert[val]
+      else
+        val
+      end
+    end
+
+    def convert_value_to_bts name, val
+      if @@track_config[name] && convert = @@track_config[name][:bts_of_track]
+        convert[val]
+      else
+        val
       end
     end
   end

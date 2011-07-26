@@ -3,7 +3,7 @@ class DefectsController < ApplicationController
 
   # GET /defects/grid_config.json
   def grid_config
-    session[:bts] = nil
+    session[:bts_dump] = nil
     respond_to do |format|
       format.json do
         begin
@@ -28,7 +28,7 @@ class DefectsController < ApplicationController
     respond_to do |format|
       format.json do
         begin
-          defects = build_bts(bts_account).find_defects
+          defects = build_bts(bts_account).find_all
           render json: {
             success: true,
             defects: defects
@@ -51,7 +51,7 @@ class DefectsController < ApplicationController
       format.json do
         begin
           # must raise if update fails
-          build_bts(bts_account).update_defect(params[:defect])
+          build_bts(bts_account).update(params[:defect])
 
           bts_class = bts_account.bts.constantize
           track_data = bts_class.params_to_track_data(params[:defect])
