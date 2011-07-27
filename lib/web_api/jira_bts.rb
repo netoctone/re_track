@@ -19,7 +19,7 @@ module WebAPI
       :summary => {
         :track_to => :description,
         :type => :string,
-        :disabled => true,
+        :read_only => true,
         :style => {
           :width => 700
         }
@@ -87,6 +87,11 @@ module WebAPI
         :style => {
           :width => 240
         }
+      },
+      :project => {
+        :track => true,
+        :type => :string,
+        :read_only => true
       }
     })
 

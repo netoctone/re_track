@@ -28,7 +28,7 @@ module WebAPI
           :header_name => 'Name'
         },
         {
-          :source => [:params, :project],
+          :source => [:track, :project],
           :header_name => 'Project'
         },
         {
@@ -43,25 +43,34 @@ module WebAPI
       ]
 
       detailed = Array.new short_report_columns
+      detailed[1...1] = [
+        {
+          :source => [:params, :nil],
+          :header_name => ''
+        }
+      ]
       detailed[-1...-1] = [
         {
           :source => [:track, :description],
           :header_name => 'Task Desc'
         },
         {
-          :source => [:track, :start_date]
+          :source => [:track, :start_date],
+          :header_name => 'Start date'
         },
         {
-          :source => [:track, :end_date]
+          :source => [:track, :end_date],
+          :header_name => 'End date'
         },
         {
           :source => [:track, :status],
-          :header_name => 'Status',
+          :header_name => 'Detailed task description',
           :map => lambda { |stat| DefectTrack::NameOfStatus[stat] }
         }
       ]
       detailed.push({
-        :source => [:params, :comments]
+        :source => [:params, :comments],
+        :header_name => 'Comments'
       })
 
 

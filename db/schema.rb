@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110624123138) do
+ActiveRecord::Schema.define(:version => 20110725143731) do
 
   create_table "account_groups", :force => true do |t|
     t.integer  "user_id"
@@ -44,6 +44,7 @@ ActiveRecord::Schema.define(:version => 20110624123138) do
     t.datetime "end_date"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "project"
   end
 
   create_table "report_accounts", :force => true do |t|
