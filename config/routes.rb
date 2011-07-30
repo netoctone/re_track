@@ -5,23 +5,9 @@ ReTrack::Application.routes.draw do
   put 'defects/update'
 
 
-  get 'bts_accounts/list', 'bts_accounts/show',
-      'bts_accounts/show_current', 'bts_accounts/form_data_config'
-  post 'bts_accounts/create'
-  put 'bts_accounts/update', 'bts_accounts/update_current'
-  delete 'bts_accounts/destroy'
-
-  get 'report_accounts/list', 'report_accounts/show',
-      'report_accounts/show_current', 'report_accounts/form_data_config'
-  post 'report_accounts/create'
-  put 'report_accounts/update', 'report_accounts/update_current'
-  delete 'report_accounts/destroy'
-
-  get 'account_groups/list', 'account_groups/show',
-      'account_groups/show_current', 'account_groups/form_data_config'
-  post 'account_groups/create'
-  put 'account_groups/update', 'account_groups/update_current'
-  delete 'account_groups/destroy'
+  UserCreations.routes :bts_accounts, binding
+  UserCreations.routes :report_accounts, binding
+  UserCreations.routes :account_groups, binding
 
   get 'account_groups/acc_list', 'account_groups/acc_add_list'
   post 'account_groups/add_acc'
@@ -31,7 +17,8 @@ ReTrack::Application.routes.draw do
   get 'func/track_show_report_by_date'
   post 'func/track_save_report_by_date'
 
-  resources :users, :user_sessions
+  resources :users, :except => [:edit, :update, :destroy]
+  resources :user_sessions, :only => [:create]
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
