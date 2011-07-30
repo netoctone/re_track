@@ -99,8 +99,7 @@ module UserCreations
 
     # DELETE /(user_creations)/destroy.json
     def destroy
-      user_creation = creation_model.find(params[:id])
-      user_creation.destroy #is check needed?
+      creation_model.destroy(params[:id])
 
       respond_to do |format|
         format.json do
