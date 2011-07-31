@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ReTrack</title>
+  <%= stylesheet_link_tag '../ext-3.3.1/resources/css/ext-all' %>
+  <%= javascript_include_tag '../ext-3.3.1/adapter/ext/ext-base',
+                             '../ext-3.3.1/ext-all' %>
+  <%= csrf_meta_tag %>
+</head>
+<body>
+
+<%= yield %>
+
+</body>
+</html>

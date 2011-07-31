@@ -1,5 +1,24 @@
 ReTrack::Application.routes.draw do
-  resources :users, :user_sessions
+  get 'func/index', 'func/username', 'func/bts_list'
+
+  get 'defects/grid_config', 'defects/show_all'
+  put 'defects/update'
+
+
+  UserCreations.routes :bts_accounts, binding
+  UserCreations.routes :report_accounts, binding
+  UserCreations.routes :account_groups, binding
+
+  get 'account_groups/acc_list', 'account_groups/acc_add_list'
+  post 'account_groups/add_acc'
+  delete 'account_groups/remove_acc'
+
+
+  get 'func/track_show_report_by_date'
+  post 'func/track_save_report_by_date'
+
+  resources :users, :except => [:edit, :update, :destroy]
+  resources :user_sessions, :only => [:create]
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -52,7 +71,7 @@ ReTrack::Application.routes.draw do
 
   # You can have the root of your site routed with "root"
   # just remember to delete public/index.html.
-  root :to => "users#index"
+  root :to => "func#index"
 
   # See how all your routes lay out with "rake routes"
 
