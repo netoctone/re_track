@@ -1,5 +1,6 @@
 class AuthenticableValidator < ActiveModel::Validator
   def validate(record)
+    raise WebAPI::Error, 'Service can\'t be blank' unless record.service
     details = {
       :login => record.login,
       :password => record.password
