@@ -191,7 +191,7 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
       });
       var record = this.getStore().getAt(row);
       form.updateSubject(record.data);
-      new Ext.Window({
+      var win = new Ext.Window({
         title: 'Bug details',
         resizable: false,
         padding: 10,
@@ -208,6 +208,12 @@ ReTrack.BugsPanel = Ext.extend(Ext.Panel, {
                   Ext.Msg.alert('Error', errormsg);
                 }
               });
+            }
+          },
+          {
+            text: 'Cancel',
+            handler: function() {
+              win.close();
             }
           }
         ],
