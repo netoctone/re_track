@@ -8,6 +8,14 @@
 </head>
 <body>
 
+  <%= link_to 'Main', :root %>
+  <% if current_user %>
+    <%= link_to 'Logout', :logout %>
+  <% else %>
+    <%= link_to 'Login', :login %>
+    <%= link_to 'Register', new_user_path %>
+  <% end %>
+
 <%= yield %>
 
 </body>

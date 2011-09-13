@@ -1,4 +1,25 @@
 ReTrack::Application.routes.draw do
+  get 'func/index', 'func/username', 'func/bts_list'
+
+  get 'defects/grid_config', 'defects/show_all'
+  put 'defects/update'
+
+
+  UserCreations.routes :bts_accounts, binding
+  UserCreations.routes :report_accounts, binding
+  UserCreations.routes :account_groups, binding
+
+  get 'account_groups/acc_list', 'account_groups/acc_add_list'
+  post 'account_groups/add_acc'
+  delete 'account_groups/remove_acc'
+
+
+  get 'func/track_show_report_by_date'
+  post 'func/track_save_report_by_date'
+
+  resources :users, :except => [:edit, :update, :destroy]
+  resources :user_sessions, :only => [:create]
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
@@ -9,6 +30,8 @@ ReTrack::Application.routes.draw do
   # Sample of named route:
   #   match 'products/:id/purchase' => 'catalog#purchase', :as => :purchase
   # This route can be invoked with purchase_url(:id => product.id)
+  match 'login' => 'user_sessions#new', :as => :login
+  match 'logout' => 'user_sessions#destroy', :as => :logout
 
   # Sample resource route (maps HTTP verbs to controller actions automatically):
   #   resources :products
@@ -48,7 +71,7 @@ ReTrack::Application.routes.draw do
 
   # You can have the root of your site routed with "root"
   # just remember to delete public/index.html.
-  # root :to => "welcome#index"
+  root :to => "func#index"
 
   # See how all your routes lay out with "rake routes"
 
